@@ -17,7 +17,7 @@ port( cpu_clk					: in std_logic;
 		cpu_rst					: in std_logic;
 		mdout_bus				: in std_logic_vector(15 downto 0); 
 		mdin_bus					: out std_logic_vector(15 downto 0); 
-		mem_addr					: out std_logic_vector(7 downto 0);
+		mem_addr					: out std_logic_vector(11 downto 0);
 		Mre_s						: out std_logic;
 		Mwe_s						: out std_logic;	
 		oe_s						: out std_logic;
@@ -50,7 +50,7 @@ signal PCld_s					: std_logic;												-- Program Counter select		(CTRLER 	->
 signal jpz_s					: std_logic;												-- Jump check flag					(CTRLER 	-> ALU)
 
 begin
-	mem_addr <= addr_bus(7 downto 0); 
+	mem_addr <= addr_bus(11 downto 0); 
 	Unit0: ctrl_unit port map(	
         cpu_clk,
         cpu_rst,

@@ -42,8 +42,8 @@ architecture fsm of controller is
 			S6,S6a,S7,S7a,S7b,S8,S8a,S8b,S9,S9a,S9b,S10,S11,S11a,S12,S12a,S12b,s13,s13a,s13b);
   signal state: state_type;
   signal delaystate: state_type;
-  constant memdelay: integer :=1;
-  signal usedelay: boolean := false;
+  constant memdelay: integer :=12;
+  signal usedelay: boolean := true;
   
 begin
   process(clock, rst, IR_word)
@@ -223,7 +223,7 @@ begin
 				maccesdelay:=memdelay;
 				delaystate<= S11a;
 				state <= Sdly;
-			end if;			
+			end if;	
 	  when S11a =>  oe_ctrl <= '1'; 
 			Mre_ctrl <= '0';
 			state <= S1;
