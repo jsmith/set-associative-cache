@@ -244,13 +244,10 @@ begin
 		
 		when s13 =>
 			-- REG[r1] <= MEM[R2]
-			RFr2a_ctrl <= IR_word(7 downto 4); --REG2 Address 
-			RFr2e_ctrl <= '1'; --REG2 Read Enable
+			RFr1a_ctrl <= IR_word(7 downto 4); --REG2 Address 
+			RFr1e_ctrl <= '1'; --REG2 Read Enable
 			Ms_ctrl <= "00";
 			RFs_ctrl <= "01"; -- Use ALU out as memory address
-			ALUs_ctrl <= "0001";
-			Mre_ctrl <= '1'; --Memory Read Enable
-			Mwe_ctrl <= '0';
 			if usedelay = false then state <= S13a;
 			else 
 				maccesdelay:=memdelay;
@@ -258,17 +255,16 @@ begin
 				state <= Sdly;
 			end if;
 		when S13a =>
-			Mre_ctrl <= '0';
-			RFr2e_ctrl <= '0';
+			RFr1e_ctrl <= '0';
+			Mre_ctrl <= '1'; --Memory Read Enable
 			RFwa_ctrl <= IR_word(11 downto 8);
-			RFwe_ctrl <= '1';
-			state <= s13b;
+			state <= S13b;
 		when S13b =>
-			Ms_ctrl <= "10";
-			RFwe_ctrl <= '0';
+			RFwe_ctrl <= '1';
+			Mre_ctrl <= '0';
 			state <= S1;
 			
-	  	when others =>
+	  when others =>
 	end case;
     end if;
   end process;
