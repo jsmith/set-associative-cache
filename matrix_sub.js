@@ -1,26 +1,48 @@
-mov4 R0 1
+#define ONE R0
+set ONE 1
 
-mov4 R1 50
-mov4 R2 200
-add R3 R1 R2
-mov3 R3 R2
-sub R2 R2 R0
-jz R2 1
+#define BASE R1
+#define COUNT R2
+#define ADDR R3
+#define TEMP R4
 
-mov4 R1 50 # countA
-mov4 R2 150 # countB
-mov4 R3 100 # count
+set BASE 50
+set COUNT 200
 
-load R4 R1 # dataA = MEM[countA]
-load R5 R2 # dataB = MEM[countB]
-sub R4 R5 R4 # dataA = dataB - dataA
-mov3 R1 R4 # MEM[countA] = dataA
+INIT_MATRICES:
+add ADDR BASE COUNT     # R3 <- R1 + R2
+save ADDR COUNT         # MEM[R3] <- R2
+subt COUNT COUNT ONE    # R2 <- R2 - 1
+mov1 TEMP 51            # TEMP <- MEM[51]
+jz TEMP INIT_MATRICES   # if R4 == 0, goto 3
 
-add R1 R1 R0
-add R2 R2 R0
-sub R3 R3 R0
-jz R3 10
+# redefine variables for second loop :)
+#define ADDR_A R1
+#define ADDR_B R2
+#define TEMP R3
+#define DATA_A R4
+#define DATA_B R5
+#define RES R5
 
+readm 0
+
+set ADDR_A 150
+set ADDR_B 250
+
+load DATA_A ADDR_A
+load DATA_B ADDR_B
+subt DATA_A DATA_B DATA_A
+save ADDR_A DATA_A
+
+subt ADDR_A ADDR_A ONE
+subt ADDR_B ADDR_B ONE
+# Since we are getting MEM[50], subtraction will actually occur n*n + 1
+# times. ie. 2x2 = 5, 10x10 = 101.
+# This seemed like the easiest way to stop looping
+mov1 TEMP 50
+jz TEMP 11
+
+# Debugging Output
 readm 50
 readm 51
 readm 60
