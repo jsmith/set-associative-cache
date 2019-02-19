@@ -42,7 +42,7 @@ architecture fsm of controller is
 			S6,S6a,S7,S7a,S7b,S8,S8a,S8b,S9,S9a,S9b,S10,S11,S11a,S12,S12a,S12b,s13,s13a,s13b);
   signal state: state_type;
   signal delaystate: state_type;
-  constant memdelay: integer :=12;
+  constant memdelay: integer := 12;
   signal usedelay: boolean := true;
   
 begin
@@ -248,17 +248,17 @@ begin
 			RFr1e_ctrl <= '1'; --REG2 Read Enable
 			Ms_ctrl <= "00";
 			RFs_ctrl <= "01"; -- Use ALU out as memory address
-			if usedelay = false then state <= S13a;
-			else 
-				maccesdelay:=memdelay;
-				delaystate <= S13a;
-				state <= Sdly;
-			end if;
+			state <= S13a;
 		when S13a =>
 			RFr1e_ctrl <= '0';
 			Mre_ctrl <= '1'; --Memory Read Enable
 			RFwa_ctrl <= IR_word(11 downto 8);
-			state <= S13b;
+			if usedelay = false then state <= S13b;
+			else 
+				maccesdelay:=memdelay;
+				delaystate <= S13b;
+				state <= Sdly;
+			end if;
 		when S13b =>
 			RFwe_ctrl <= '1';
 			Mre_ctrl <= '0';

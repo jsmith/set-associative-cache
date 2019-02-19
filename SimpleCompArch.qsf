@@ -92,7 +92,6 @@ set_global_assignment -name VECTOR_WAVEFORM_FILE output_files/Waveform.vwf
 set_global_assignment -name QIP_FILE m4k_ram.qip
 set_global_assignment -name HEX_FILE m4k_mem.hex
 set_global_assignment -name VECTOR_WAVEFORM_FILE SimSimpleCompArch_OURS.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform.vwf
 set_global_assignment -name QIP_FILE PLL_12.qip
 set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform_temp.vwf
 set_global_assignment -name VHDL_FILE memory_clock.vhd
