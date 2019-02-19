@@ -2,7 +2,7 @@
 -- Simple Computer Architecture
 --
 -- System composed of
--- 	CPU, Memory and output buffer
+-- 	CPU, memory_clock and output buffer
 --    Sinals with the prefix "D_" are set for Debugging purpose only
 -- SimpleCompArch.vhd
 -------------------------------------------------------------------
@@ -28,17 +28,18 @@ port( sys_clk								:	in std_logic;
 
 		-- Debug signals from Memory: output for simulation purpose only	
 		D_mdout_bus,D_mdin_bus					: out std_logic_vector(15 downto 0); 
-		D_mem_addr											: out std_logic_vector(7 downto 0); 
-		D_Mre,D_Mwe										: out std_logic 
+		D_mem_addr									: out std_logic_vector(11 downto 0); 
+		D_Mre,D_Mwe									: out std_logic 
 		-- end debug variables	
 );
 end SimpleCompArch;
 
 architecture rtl of SimpleCompArch is
---Memory local variables												  							        							(ORIGIN	-> DEST)
+--Memory local variables												  							        	(ORIGIN	-> DEST)
+	signal pll_out_clock				: STD_LOGIC  ; -- Not currently used
 	signal mdout_bus					: std_logic_vector(15 downto 0);  -- Mem data output 		(MEM  	-> CTLU)
 	signal mdin_bus					: std_logic_vector(15 downto 0);  -- Mem data bus input 	(CTRLER	-> Mem)
-	signal mem_addr					: std_logic_vector(7 downto 0);   -- Const. operand addr.(CTRLER	-> MEM)
+	signal mem_addr					: std_logic_vector(11 downto 0);   -- Const. operand addr.(CTRLER	-> MEM)
 	signal Mre							: std_logic;							 -- Mem. read enable  	(CTRLER	-> Mem) 
 	signal Mwe							: std_logic;							 -- Mem. write enable 	(CTRLER	-> Mem)
 
@@ -46,7 +47,7 @@ architecture rtl of SimpleCompArch is
 	signal oe							: std_logic;	
 begin
 
-Unit1: CPU port map (
+Unit0: CPU port map (
     sys_clk,
     sys_rst,
     mdout_bus,
@@ -69,10 +70,18 @@ Unit1: CPU port map (
     D_PCld, 
     D_jpz
     --Degug signals
-);	 						
-																					
-Unit2: memory port map(	sys_clk,sys_rst,Mre,Mwe,mem_addr,mdin_bus,mdout_bus);
-Unit3: obuf port map(oe, mdout_bus, sys_output);
+);	 				
+																				
+Unit1: m4k_ram port map(
+	mem_addr, 
+	sys_clk,
+	mdin_bus, 
+	Mre, 
+	Mwe,
+	mdout_bus
+);
+
+Unit2: obuf port map(oe, mdout_bus, sys_output);
 
 -- Debug signals: output to upper level for simulation purpose only
 	D_mdout_bus <= mdout_bus;	

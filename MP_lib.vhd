@@ -29,7 +29,7 @@ port (
 		cpu_rst					: in std_logic;
 		mdout_bus				: in std_logic_vector(15 downto 0); 
 		mdin_bus					: out std_logic_vector(15 downto 0); 
-		mem_addr					: out std_logic_vector(7 downto 0);
+		mem_addr					: out std_logic_vector(11 downto 0);
 		Mre_s						: out std_logic;
 		Mwe_s						: out std_logic;	
 		oe_s						: out std_logic;
@@ -99,17 +99,17 @@ port(
 );
 end component;
 
-component memory is
-port ( 	
-	clock	: 	in std_logic;
-	rst		: 	in std_logic;
-	Mre		:	in std_logic;
-	Mwe		:	in std_logic;
-	address	:	in std_logic_vector(7 downto 0);
-	data_in	:	in std_logic_vector(15 downto 0);
-	data_out:	out std_logic_vector(15 downto 0)
-);
-end component;
+component m4k_ram IS
+	PORT
+	(
+		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+		clock		: IN STD_LOGIC  := '1';
+		data		: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+		rden		: IN STD_LOGIC  := '1';
+		wren		: IN STD_LOGIC ;
+		q		: OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+	);
+END component;
 
 component obuf is
 port(	
