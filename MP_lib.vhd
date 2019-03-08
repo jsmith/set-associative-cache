@@ -202,6 +202,18 @@ port(
 );
 end component;
 
+component cache is
+port ( 	
+		clock: in std_logic;
+		rst: in std_logic;
+		cpu_read: in std_logic;
+		cpu_write: in std_logic;
+		cpu_addr: in std_logic_vector(11 downto 0);
+		data_in: in std_logic_vector(15 downto 0);
+		data_out: out std_logic_vector(15 downto 0)
+);
+end component;
+
 end MP_lib;
 
 
