@@ -33,7 +33,10 @@ port(
 	ALUs_cu: out std_logic_vector(3 downto 0);
 	Mre_cu: out std_logic;
 	Mwe_cu: out std_logic;
-	oe_cu: out std_logic
+	oe_cu: out std_logic;
+	
+	-- Cache Signals
+	cache_read_complete: in std_logic
 );
 end ctrl_unit;
 
@@ -66,7 +69,10 @@ begin
 		Ms_sig,
 		Mre_cu,
 		Mwe_cu,
-		oe_cu
+		oe_cu,
+		
+		-- Cache Signals
+		cache_read_complete
 	);
 
 	U1: PC port map(

@@ -33,6 +33,8 @@ port(
 		Mre_s		: out std_logic;
 		Mwe_s		: out std_logic;
 		oe_s		: out std_logic;
+		
+		cache_read_complete: in std_logic;
 
 		-- Debug variables: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
@@ -87,7 +89,8 @@ port(
 	Ms_ctrl:		out std_logic_vector(1 downto 0);
 	Mre_ctrl:		out std_logic;
 	Mwe_ctrl:		out std_logic;
-	oe_ctrl:		out std_logic
+	oe_ctrl:		out std_logic;
+	cache_read_complete: in std_logic
 );
 end component;
 
@@ -105,10 +108,10 @@ component m4k_ram IS
 	(
 		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
-		data		: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+		data		: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 		rden		: IN STD_LOGIC  := '1';
 		wren		: IN STD_LOGIC ;
-		q		: OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+		q		: OUT STD_LOGIC_VECTOR (63 DOWNTO 0)
 	);
 END component;
 
@@ -177,7 +180,8 @@ port(
 	ALUs_cu:	out	std_logic_vector(3 downto 0);	
 	Mre_cu:		out 	std_logic;
 	Mwe_cu:		out 	std_logic;
-	oe_cu:		out 	std_logic
+	oe_cu:		out 	std_logic;
+	cache_read_complete: in std_logic
 );
 end component;
 
@@ -210,7 +214,13 @@ port (
 		cpu_write: in std_logic;
 		cpu_addr: in std_logic_vector(11 downto 0);
 		data_in: in std_logic_vector(15 downto 0);
-		data_out: out std_logic_vector(15 downto 0)
+		data_out: out std_logic_vector(15 downto 0);
+		read_complete: out std_logic;
+		write_complete: out std_logic;
+		
+		-- Debug Signals
+		D_block_out: out std_logic_vector(63 downto 0);
+		D_block_addr: out std_logic_vector(11 downto 0)
 );
 end component;
 

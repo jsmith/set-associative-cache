@@ -29,7 +29,10 @@ port( sys_clk								:	in std_logic;
 		-- Debug signals from Memory: output for simulation purpose only	
 		D_mdout_bus,D_mdin_bus					: out std_logic_vector(15 downto 0); 
 		D_mem_addr									: out std_logic_vector(11 downto 0); 
-		D_cpu_read,D_cpu_write									: out std_logic 
+		D_cpu_read,D_cpu_write					: out std_logic;
+		D_block_out: out std_logic_vector(63 downto 0);
+		D_block_addr: out std_logic_vector(11 downto 0)
+		
 		-- end debug variables	
 );
 end SimpleCompArch;
@@ -43,7 +46,9 @@ architecture rtl of SimpleCompArch is
 	signal cpu_write: std_logic;							 -- Mem. write enable 	(CTRLER	-> Mem)
 	signal mem_read: std_logic;							 -- Mem. read enable  	(CTRLER	-> Mem) 
 	signal mem_write: std_logic;							 -- Mem. write enable 	(CTRLER	-> Mem)
-
+	signal read_complete: std_logic;
+	signal write_complete: std_logic;
+	
 	--System local variables
 	signal oe							: std_logic;	
 begin
@@ -57,6 +62,10 @@ Unit0: CPU port map (
     cpu_read,
     cpu_write,
     oe,
+	 
+	 --Cache signals
+	 read_complete,
+	 
     D_rfout_bus,
     D_RFwa,
     D_RFr1a, 
@@ -82,7 +91,12 @@ Unit2: cache port map(
 	cpu_write,
 	mem_addr,
 	mdin_bus,
-	mdout_bus
+	mdout_bus,
+	read_complete,
+	write_complete,
+	
+	D_block_out,
+	D_block_addr
 );
 
 -- Debug signals: output to upper level for simulation purpose only
