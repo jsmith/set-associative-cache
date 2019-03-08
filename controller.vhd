@@ -54,14 +54,14 @@ begin
 	begin
 	if rst='1' then
 		Ms_ctrl <= "10";
-		PCclr_ctrl <= '1';		  	-- Reset State
+		PCclr_ctrl <= '1';			-- Reset State
 		PCinc_ctrl <= '0';
 		IRld_ctrl <= '0';
-		RFs_ctrl <= "00";		
+		RFs_ctrl <= "00";
 		Rfwe_ctrl <= '0';
 		Mre_ctrl <= '0';
-		Mwe_ctrl <= '0';					
-		jmpen_ctrl <= '0';		
+		Mwe_ctrl <= '0';
+		jmpen_ctrl <= '0';
 		oe_ctrl <= '0';
 		state <= S0;
 	elsif (clock'event and clock='1') then

@@ -29,11 +29,11 @@ type ram_type is array (0 to 255) of std_logic_vector(15 downto 0);
 signal tmp_ram: ram_type;
 begin
 	write: process(clock, rst, Mre, address, data_in)
-	begin				-- program to generate 10 fabonacci number	 
+	begin
+		-- program to generate 10 fabonacci number
 		if rst='1' then		
 			tmp_ram <= (
-            	-- Do initial setup.
-					
+				-- Do initial setup.
 				0 => x"3001",
 				1 => x"3132",
 				2 => x"32C8",

@@ -6,7 +6,7 @@ use ieee.std_logic_arith.all;
 package MP_lib is
 
 type ram_type is array (0 to 255) of 
-        		std_logic_vector(15 downto 0);
+		std_logic_vector(15 downto 0);
 
 constant ZERO : std_logic_vector(15 downto 0) := "0000000000000000";
 constant HIRES : std_logic_vector(15 downto 0) := "ZZZZZZZZZZZZZZZZ";
@@ -24,15 +24,16 @@ constant addi: std_logic_vector(3 downto 0) := "1001";
 constant load: std_logic_vector(3 downto 0) := "1010";
 
 component CPU is
-port (	
-		cpu_clk					: in std_logic;
-		cpu_rst					: in std_logic;
-		mdout_bus				: in std_logic_vector(15 downto 0); 
-		mdin_bus					: out std_logic_vector(15 downto 0); 
-		mem_addr					: out std_logic_vector(11 downto 0);
-		Mre_s						: out std_logic;
-		Mwe_s						: out std_logic;	
-		oe_s						: out std_logic;
+port(
+		cpu_clk		: in std_logic;
+		cpu_rst		: in std_logic;
+		mdout_bus	: in std_logic_vector(15 downto 0);
+		mdin_bus	: out std_logic_vector(15 downto 0);
+		mem_addr	: out std_logic_vector(11 downto 0);
+		Mre_s		: out std_logic;
+		Mwe_s		: out std_logic;
+		oe_s		: out std_logic;
+
 		-- Debug variables: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
 		D_RFwa_s, D_RFr1a_s, D_RFr2a_s: out std_logic_vector(3 downto 0);
@@ -45,7 +46,7 @@ port (
 end component;
 
 component alu is
-port (	
+port (
 		num_A: 	in std_logic_vector(15 downto 0);
 		num_B: 	in std_logic_vector(15 downto 0);
 		jpsign:	in std_logic;
@@ -56,46 +57,46 @@ port (
 end component;
 
 component bigmux is
-port( 	
-	Ia: 	in std_logic_vector(15 downto 0);
-	Ib: 	in std_logic_vector(15 downto 0);	  
-	Ic:	in std_logic_vector(15 downto 0);
-	Id:	in std_logic_vector(15 downto 0);
-	Option:	in std_logic_vector(1 downto 0);
-	Muxout:	out std_logic_vector(15 downto 0)
+port(
+	Ia:			in std_logic_vector(15 downto 0);
+	Ib:			in std_logic_vector(15 downto 0);
+	Ic:			in std_logic_vector(15 downto 0);
+	Id:			in std_logic_vector(15 downto 0);
+	Option:		in std_logic_vector(1 downto 0);
+	Muxout:		out std_logic_vector(15 downto 0)
 );
 end component;
 
 component controller is
-port(	
-	clock:		in std_logic;
-	rst:		in std_logic;
-	IR_word:	in std_logic_vector(15 downto 0);
-	RFs_ctrl:	out std_logic_vector(1 downto 0);
-	RFwa_ctrl:	out std_logic_vector(3 downto 0);
-	RFr1a_ctrl:	out std_logic_vector(3 downto 0);
-	RFr2a_ctrl:	out std_logic_vector(3 downto 0);
-	RFwe_ctrl:	out std_logic;
-	RFr1e_ctrl:	out std_logic;
-	RFr2e_ctrl:	out std_logic;						 
-	ALUs_ctrl:	out std_logic_vector(3 downto 0);	 
-	jmpen_ctrl:	out std_logic;
-	PCinc_ctrl:	out std_logic;
-	PCclr_ctrl:	out std_logic;
-	IRld_ctrl:	out std_logic;
-	Ms_ctrl:	out std_logic_vector(1 downto 0);
-	Mre_ctrl:	out std_logic;
-	Mwe_ctrl:	out std_logic;
-	oe_ctrl:	out std_logic
+port(
+	clock:			in std_logic;
+	rst:			in std_logic;
+	IR_word:		in std_logic_vector(15 downto 0);
+	RFs_ctrl:		out std_logic_vector(1 downto 0);
+	RFwa_ctrl:		out std_logic_vector(3 downto 0);
+	RFr1a_ctrl:		out std_logic_vector(3 downto 0);
+	RFr2a_ctrl:		out std_logic_vector(3 downto 0);
+	RFwe_ctrl:		out std_logic;
+	RFr1e_ctrl:		out std_logic;
+	RFr2e_ctrl:		out std_logic;
+	ALUs_ctrl:		out std_logic_vector(3 downto 0);
+	jmpen_ctrl:		out std_logic;
+	PCinc_ctrl:		out std_logic;
+	PCclr_ctrl:		out std_logic;
+	IRld_ctrl:		out std_logic;
+	Ms_ctrl:		out std_logic_vector(1 downto 0);
+	Mre_ctrl:		out std_logic;
+	Mwe_ctrl:		out std_logic;
+	oe_ctrl:		out std_logic
 );
 end component;
 
 component IR is
-port(	
-	IRin:	  in std_logic_vector(15 downto 0);
-	IRld:	  in std_logic;
-	dir_addr: out std_logic_vector(15 downto 0);
-	IRout: 	  out std_logic_vector(15 downto 0)
+port(
+	IRin:		in std_logic_vector(15 downto 0);
+	IRld:		in std_logic;
+	dir_addr:	out std_logic_vector(15 downto 0);
+	IRout:		out std_logic_vector(15 downto 0)
 );
 end component;
 
@@ -112,7 +113,7 @@ component m4k_ram IS
 END component;
 
 component obuf is
-port(	
+port(
 	O_en: 		in std_logic;
 	obuf_in: 	in std_logic_vector(15 downto 0);
 	obuf_out: 	out std_logic_vector(15 downto 0)
@@ -180,7 +181,7 @@ port(
 );
 end component;
 
-component datapath is				
+component datapath is
 port(
 	clock_dp:	in 	std_logic;
 	rst_dp:		in 	std_logic;
