@@ -52,15 +52,14 @@ architecture behv of cache	is
 	type tag_type is array (0 to 7) of std_logic_vector(7 downto 0);
 	signal tmp_tags: tag_type;
 	
-	-- TODO bad naming. Shouldn't be called hit_states and hit_state.
+	-- TODO bad naming. Shouldn't be called hit_states
 	type hit_states is (ReadHit, WriteHit, ReadMiss, HitWaitState);
+	signal current_hit_state: hit_states;
 	signal hit_state: hit_states;
 	signal miss_state: hit_states;
-	signal current_hit_state: hit_states;
-
+	
 	signal initialized: std_logic_vector(7 downto 0);
 	signal dirty: std_logic_vector(7 downto 0);
-	
 	signal lru: std_logic_vector(7 downto 0);
 	
 	type states is (
@@ -106,10 +105,10 @@ begin
 	variable set_int: integer; -- TODO Rename this
 	variable read_line: integer; -- TODO Rename this
 	begin
+		-- Initialize signals for operations
 		tag <= cpu_addr(11 downto 4);
 		set <= cpu_addr(3 downto 2);
 		word <= cpu_addr(1 downto 0);
-		
 		block_addr <= cpu_addr(11 downto 2) & "00";
 		
 		if (rst = '1') then
@@ -120,6 +119,7 @@ begin
 			dirty <= x"00";
 			tmp_tags <= (others => x"00");
 			mem_read <= '0';
+			block_in <= x"0000000000000000";
 			read_complete <= '0';
 			write_complete <= '0';
 			prev_cpu_read <= '0';
@@ -253,7 +253,7 @@ begin
 				when WaitState =>
 			end case;
 			
-			case hit_state is
+			case current_hit_state is
 				when ReadHit =>
 					read_complete <= '1';
 					case word is
