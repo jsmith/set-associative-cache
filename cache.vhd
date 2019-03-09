@@ -114,7 +114,7 @@ begin
 		if (rst = '1') then
 			tmp_cache <= (others => x"0000000000000000");
 			state <= WaitState;
-			hit_state <= HitWaitState;
+			current_hit_state <= HitWaitState;
 			initialized <= x"00";
 			dirty <= x"00";
 			tmp_tags <= (others => x"00");
@@ -265,7 +265,8 @@ begin
 							data_out <= tmp_cache(read_line)(31 downto 16);
 						when "11" =>
 							data_out <= tmp_cache(read_line)(15 downto 00);
-					end case;
+          end case;
+          current_hit_state <= HitWaitState;
 				when WriteHit =>
 					dirty(set_int) <= '1';
 					write_complete <= '1';
@@ -279,7 +280,8 @@ begin
 							tmp_cache(read_line)(31 downto 16) <= data_in;
 						when "11" => 
 							tmp_cache(read_line)(15 downto 00) <= data_in;
-					end case;
+          end case;
+          current_hit_state <= HitWaitState;
 				when ReadMiss =>
 					read_complete <= '1';
 					case word is
@@ -291,7 +293,8 @@ begin
 							data_out <= block_out(47 downto 32);	
 						when "11" =>
 							data_out <= block_out(63 downto 48);
-					end case;
+          end case;
+          current_hit_state <= HitWaitState;
 				when HitWaitState =>
 					-- DO Nothing
 			end case;
