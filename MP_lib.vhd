@@ -220,8 +220,14 @@ port (
 	
 	-- Debug Signals
 	D_block_out: out std_logic_vector(63 downto 0);
+	D_block_in: out std_logic_vector(63 downto 0);
 	D_block_addr: out std_logic_vector(11 downto 0);
-	D_mem_read: out std_logic
+	D_mem_read: out std_logic;
+	D_write_back: out std_logic;
+	D_hit: out std_logic;
+	D_initialized: out std_logic_vector(7 downto 0);
+	D_dirty: out std_logic_vector(7 downto 0);
+	D_lru: out std_logic_vector(7 downto 0)
 );
 end component;
 

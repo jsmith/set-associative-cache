@@ -26,8 +26,14 @@ port (
 	
 	-- Debug Signals
 	D_block_out: out std_logic_vector(63 downto 0);
+	D_block_in: out std_logic_vector(63 downto 0);
 	D_block_addr: out std_logic_vector(11 downto 0);
-	D_mem_read: out std_logic
+	D_mem_read: out std_logic;
+	D_write_back: out std_logic;
+	D_hit: out std_logic;
+	D_initialized: out std_logic_vector(7 downto 0);
+	D_dirty: out std_logic_vector(7 downto 0);
+	D_lru: out std_logic_vector(7 downto 0)
 );
 end cache;
 
@@ -37,19 +43,25 @@ architecture behv of cache	is
 	signal tmp_cache: cache_type;
 	
 	type tag_type is array (0 to 7) of std_logic_vector(7 downto 0);
-	signal tmp_tag: tag_type;
+	signal tmp_tags: tag_type;
 	
 	signal initialized: std_logic_vector(7 downto 0);
 	signal dirty: std_logic_vector(7 downto 0);
 	
 	signal lru: std_logic_vector(7 downto 0);
 	
-	type read_states is (StartRead, MissRead, FinishRead, WaitState, Delay);
-	signal read_state: read_states;
-	signal delay_state: read_states;
-
-	type write_states is (WriteStart);
-	signal write_state: write_states;
+	type states is (
+		StartRead, 
+		MissRead, 
+		FinishRead, 
+		Write, 
+		WaitState, 
+		Delay, 
+		StartWrite,
+		WriteFinish
+	);
+	signal state: states;
+	signal delay_state: states;
 
 	signal tag: std_logic_vector(7 downto 0);
 	signal set: std_logic_vector(1 downto 0);
@@ -57,6 +69,9 @@ architecture behv of cache	is
 	
 	signal mem_read: std_logic;
 	signal mem_write: std_logic;
+
+	signal prev_cpu_read: std_logic;
+	signal prev_cpu_write: std_logic;
 	
 	signal block_out: std_logic_vector(63 downto 0);
 	signal block_in: std_logic_vector(63 downto 0);
@@ -87,147 +102,169 @@ begin
 		
 		if (rst = '1') then
 			tmp_cache <= (others => x"0000000000000000");
-			read_state <= StartRead;
-			write_state <= WriteState;
+			state <= WaitState;
 			initialized <= x"00";
 			dirty <= x"00";
-			tmp_tag <= (others => x"00");
-			mem_read <= '0';			
+			tmp_tags <= (others => x"00");
+			mem_read <= '0';
+			prev_cpu_read <= '0';
+			prev_cpu_write <= '0';	
 		elsif (clock'event and clock='1') then
 			-- Cache read
-			if (cpu_read = '1' and cpu_read'event and cpu_write = '0') then
-				set_int := conv_integer(set) * 2;
-				read_state <= StartWrite;
+			set_int := conv_integer(set) * 2;
 
-				case read_state is
-					when StartRead =>			
-						-- Check "Hit"
-						-- loop 0 and 1
+			-- The following two if statements check for events on the read and write signals
+			-- If the signal -> 1, then start the read / write process
+			-- else the signal -> 0, meaning we should stop cache execution by putting it in a wait state
+			-- This is important since we moved the state machine out of the if statements
+			if prev_cpu_read /= cpu_read then
+				if cpu_read = '1' and cpu_write = '0' then
+					set_int := conv_integer(set) * 2;
+					state <= StartRead;
+				else
+					state <= WaitState;					
+				end if;
+			end if;
 
-						is_hit <= '0';
-						for i in 0 to 1 loop
-							if (tag = tmp_tag(set_int + i) and initialized(set_int + i) = '1') then
-								case word is
-									when "00" =>
-										data_out <= tmp_cache(set_int + i)(63 downto 48);
-									when "01" =>
-										data_out <= tmp_cache(set_int + i)(47 downto 32);
-									when "10" =>
-										data_out <= tmp_cache(set_int + i)(31 downto 16);
-									when "11" =>
-										data_out <= tmp_cache(set_int + i)(15 downto 00);
-								end case;
-								
-								lru(set_int + i) <= '1';
-								lru((set_int + i + 1) mod 2) <= '0';
-								read_complete <= '1';
-								read_state <= FinishRead;
-								is_hit <= '1';
-								exit;
-							end if;
-						end loop;
+			if prev_cpu_write /= cpu_write then
+				if cpu_write = '1' and cpu_read = '0' then
+					set_int := conv_integer(set) * 2;
+					state <= StartWrite;
+				else
+					state <= WaitState;					
+				end if;
+			end if;
 
-						-- Cache "Miss"
-						if (is_hit = '0') then
+			prev_cpu_read <= cpu_read;
+			prev_cpu_write <= cpu_write;
+			
+			case state is
+				when StartRead =>			
+					-- Check "Hit"
+					-- loop 0 and 1
 
-							-- if set != initialized => replace
-							-- elif set + 1 != initialized => replace
-							-- elif (set == dirty and set + 1 == dirty) or (set != dirty and set + 1 != dirty) =>
-							--     if set == lru => replace set + 1
-							-- 	   else replace set
-							-- elif set = dirty => replace set + 1
-							-- else replace set
-
-							-- overwite line / move to later read_state as mem_read is not set to 1 yet.
+					is_hit <= '0';
+					for i in 0 to 1 loop
+						if (tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1') then
+							case word is
+								when "00" =>
+									data_out <= tmp_cache(set_int + i)(63 downto 48);
+								when "01" =>
+									data_out <= tmp_cache(set_int + i)(47 downto 32);
+								when "10" =>
+									data_out <= tmp_cache(set_int + i)(31 downto 16);
+								when "11" =>
+									data_out <= tmp_cache(set_int + i)(15 downto 00);
+							end case;
 							
-							write_back <= '0'
-							if initialized(set_int) = '0' then
-								read_line <= set_int;
-							elsif initialized(set_int + 1) = '0' then
-								read_line <= set_int + 1;
-							elsif dirty(set_int) = dirty(set_int + 1) then
-								-- Ok so they are either both dirty or both not dirty
-								-- set write_back to one of the dirty values (they will both be the same)
-								write_back = dirty(set_int);
+							lru(set_int + i) <= '1';
+							lru((set_int + i + 1) mod 2) <= '0';
+							read_complete <= '1';
+							state <= FinishRead;
+							is_hit <= '1';
+							exit;
+						end if;
+					end loop;
 
-								if lru(set_int) = '1' then
-									read_line <= set_int + 1;
-								else
-									read_line <= set_int;
-								end if;
+					-- Cache "Miss"
+					if is_hit = '0' then
+
+						-- if set != initialized => replace
+						-- elif set + 1 != initialized => replace
+						-- elif (set == dirty and set + 1 == dirty) or (set != dirty and set + 1 != dirty) =>
+						--     if set == lru => replace set + 1
+						-- 	   else replace set
+						-- elif set = dirty => replace set + 1
+						-- else replace set
+
+						-- overwite line / move to later state as mem_read is not set to 1 yet.
+						
+						write_back <= '0';
+						if initialized(set_int) = '0' then
+							read_line := set_int;
+						elsif initialized(set_int + 1) = '0' then
+							read_line := set_int + 1;
+						elsif dirty(set_int) = dirty(set_int + 1) then
+							-- Ok so they are either both dirty or both not dirty
+							-- set write_back to one of the dirty values (they will both be the same)
+							write_back <= dirty(set_int);
+
+							if lru(set_int) = '1' then
+								read_line := set_int + 1;
 							else
-								if dirty(set_int) = '1' then
-									read_line <= set_int + 1;
-								else
-									read_line <= set_int;
-								end if;
+								read_line := set_int;
 							end if;
-							
-							if write_back = '1' then
-								mem_write = '1';
-								block_in <= tmp_cache(read_line);
-								read_state <= Write;
+						else
+							if dirty(set_int) = '1' then
+								read_line := set_int + 1;
 							else
-								mem_read <= '1';
-								read_state <= MissRead;
+								read_line := set_int;
 							end if;
 						end if;
-					
-					when Write =>
-						delay_state <= WriteFinish;
-						read_state <= Delay;
-					
-					when WriteFinish =>
-						mem_write <= '0';
-						mem_read <= '1'
-						read_state <= MissRead
-
-					when MissRead =>
-						delay_state <= FinishRead;
-						read_state <= Delay;
-					
-					when Delay =>
-						read_state <= delay_state;
-
-					when FinishRead =>
-						tmp_cache(read_line) <= block_out;
-						dirty(read_line) <= '0';
-						initialized(read_line) <= '1';
-						lru(read_line) <= '0';
-						tmp_tags(read_line) <= tag;
 						
-						case word is
-							when "00" =>
-								data_out <= block_out(15 downto 00);
-							when "01" =>
-								data_out <= block_out(31 downto 16);	
-							when "10" =>
-								data_out <= block_out(47 downto 32);	
-							when "11" =>
-								data_out <= block_out(63 downto 48);
-						end case;
-						
-						read_complete <= '1';
-						mem_read <= '0';
-						read_state <= WaitState;
-					when WaitState =>
-						read_complete <= '1';
-				end case;
+						if write_back = '1' then
+							mem_write <= '1';
+							block_in <= tmp_cache(read_line);
+							state <= Write;
+						else
+							mem_read <= '1';
+							state <= MissRead;
+						end if;
+					end if;
+				
+				when Write =>
+					delay_state <= WriteFinish;
+					state <= Delay;
+				
+				when WriteFinish =>
+					mem_write <= '0';
+					mem_read <= '1';
+					state <= MissRead;
 
-			-- Write to memory (set in cache and set to dirty)
-			elsif cpu_read = '0' and cpu_write = '1' then
-				read_state <= StartRead;
+				when MissRead =>
+					delay_state <= FinishRead;
+					state <= Delay;
+				
+				when Delay =>
+					state <= delay_state;
 
-				case write_state is
-					when StartWrite =>
-						z
-				end case;
-			end if;
-			
+				when FinishRead =>
+					tmp_cache(read_line) <= block_out;
+					dirty(read_line) <= '0';
+					initialized(read_line) <= '1';
+					lru(read_line) <= '0';
+					tmp_tags(read_line) <= tag;
+					
+					case word is
+						when "00" =>
+							data_out <= block_out(15 downto 00);
+						when "01" =>
+							data_out <= block_out(31 downto 16);	
+						when "10" =>
+							data_out <= block_out(47 downto 32);	
+						when "11" =>
+							data_out <= block_out(63 downto 48);
+					end case;
+					
+					read_complete <= '1';
+					mem_read <= '0';
+					state <= WaitState;
+				when WaitState =>
+
+				when StartWrite =>
+					-- TODO
+			end case;
+
 		end if;
 	end process;
 
-	D_mem_read <= mem_read;
 	D_block_out <= block_out;
+	D_block_in <= block_in;
 	D_block_addr <= block_addr;
+	D_mem_read <= mem_read;
+	D_write_back <= write_back;
+	D_hit <= is_hit;
+	D_initialized <= initialized;
+	D_dirty <= dirty;
+	D_lru <= lru;
 end behv;
