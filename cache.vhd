@@ -5,6 +5,13 @@
 -- 2 bits word
 -- 2 bits set
 -- 8 bits tag
+-- ---------------
+-- State Machines
+-- So there are two state machines. 
+-- 1. The first is used to check hit/miss and handles the reading/writing to and from memory.
+-- 2. The second handles the hit/misses. There will be a different response depending on whether we are reading or writing.
+-- The second state machine is neccesary to avoid code duplication. It is executed sequentially after the first state machine
+-- has complete.
 
 library	ieee;
 use ieee.std_logic_1164.all;
@@ -45,6 +52,12 @@ architecture behv of cache	is
 	type tag_type is array (0 to 7) of std_logic_vector(7 downto 0);
 	signal tmp_tags: tag_type;
 	
+	-- TODO bad naming. Shouldn't be called hit_states and hit_state.
+	type hit_states is (ReadHit, WriteHit, ReadMiss, HitWaitState);
+	signal hit_state: hit_states;
+	signal miss_state: hit_states;
+	signal current_hit_state: hit_states;
+
 	signal initialized: std_logic_vector(7 downto 0);
 	signal dirty: std_logic_vector(7 downto 0);
 	
@@ -57,7 +70,6 @@ architecture behv of cache	is
 		Write, 
 		WaitState, 
 		Delay, 
-		StartWrite,
 		WriteFinish
 	);
 	signal state: states;
@@ -91,8 +103,8 @@ begin
 	);
 
 	process(cpu_write, cpu_read, cpu_addr)
-	variable set_int: integer;
-	variable read_line: integer;
+	variable set_int: integer; -- TODO Rename this
+	variable read_line: integer; -- TODO Rename this
 	begin
 		tag <= cpu_addr(11 downto 4);
 		set <= cpu_addr(3 downto 2);
@@ -103,10 +115,13 @@ begin
 		if (rst = '1') then
 			tmp_cache <= (others => x"0000000000000000");
 			state <= WaitState;
+			hit_state <= HitWaitState;
 			initialized <= x"00";
 			dirty <= x"00";
 			tmp_tags <= (others => x"00");
 			mem_read <= '0';
+			read_complete <= '0';
+			write_complete <= '0';
 			prev_cpu_read <= '0';
 			prev_cpu_write <= '0';	
 		elsif (clock'event and clock='1') then
@@ -122,6 +137,7 @@ begin
 					set_int := conv_integer(set) * 2;
 					state <= StartRead;
 				else
+					read_complete <= '0'; -- TODO Is this the right location?
 					state <= WaitState;					
 				end if;
 			end if;
@@ -129,9 +145,14 @@ begin
 			if prev_cpu_write /= cpu_write then
 				if cpu_write = '1' and cpu_read = '0' then
 					set_int := conv_integer(set) * 2;
-					state <= StartWrite;
+					state <= StartRead;
+					hit_state <= WriteHit;
+					miss_state <= WriteHit;
 				else
-					state <= WaitState;					
+					read_complete <= '0'; -- TODO Same thing here. I think there is a better location.
+					state <= WaitState;
+					hit_state <= ReadHit;
+					miss_state <= ReadMiss;			
 				end if;
 			end if;
 
@@ -139,28 +160,18 @@ begin
 			prev_cpu_write <= cpu_write;
 			
 			case state is
-				when StartRead =>			
+				when StartRead =>
 					-- Check "Hit"
 					-- loop 0 and 1
 
 					is_hit <= '0';
 					for i in 0 to 1 loop
-						if (tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1') then
-							case word is
-								when "00" =>
-									data_out <= tmp_cache(set_int + i)(63 downto 48);
-								when "01" =>
-									data_out <= tmp_cache(set_int + i)(47 downto 32);
-								when "10" =>
-									data_out <= tmp_cache(set_int + i)(31 downto 16);
-								when "11" =>
-									data_out <= tmp_cache(set_int + i)(15 downto 00);
-							end case;
-							
+						if tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1' then
+							current_hit_state <= hit_state;
+							read_line := set_int + i;
 							lru(set_int + i) <= '1';
 							lru((set_int + i + 1) mod 2) <= '0';
-							read_complete <= '1';
-							state <= FinishRead;
+							state <= WaitState;
 							is_hit <= '1';
 							exit;
 						end if;
@@ -234,7 +245,43 @@ begin
 					initialized(read_line) <= '1';
 					lru(read_line) <= '0';
 					tmp_tags(read_line) <= tag;
+
+					current_hit_state <= miss_state;
 					
+					mem_read <= '0';
+					state <= WaitState;
+				when WaitState =>
+			end case;
+			
+			case hit_state is
+				when ReadHit =>
+					read_complete <= '1';
+					case word is
+						when "00" =>
+							data_out <= tmp_cache(read_line)(63 downto 48);
+						when "01" =>
+							data_out <= tmp_cache(read_line)(47 downto 32);
+						when "10" =>
+							data_out <= tmp_cache(read_line)(31 downto 16);
+						when "11" =>
+							data_out <= tmp_cache(read_line)(15 downto 00);
+					end case;
+				when WriteHit =>
+					dirty(set_int) <= '1';
+					write_complete <= '1';
+					-- TODO Order might be whack
+					case word is
+						when "00" => 
+							tmp_cache(read_line)(63 downto 48) <= data_in;
+						when "01" => 
+							tmp_cache(read_line)(47 downto 32) <= data_in;
+						when "10" => 
+							tmp_cache(read_line)(31 downto 16) <= data_in;
+						when "11" => 
+							tmp_cache(read_line)(15 downto 00) <= data_in;
+					end case;
+				when ReadMiss =>
+					read_complete <= '1';
 					case word is
 						when "00" =>
 							data_out <= block_out(15 downto 00);
@@ -245,14 +292,8 @@ begin
 						when "11" =>
 							data_out <= block_out(63 downto 48);
 					end case;
-					
-					read_complete <= '1';
-					mem_read <= '0';
-					state <= WaitState;
-				when WaitState =>
-
-				when StartWrite =>
-					-- TODO
+				when HitWaitState =>
+					-- DO Nothing
 			end case;
 
 		end if;
