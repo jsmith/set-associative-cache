@@ -74,7 +74,7 @@ begin
 					state <= S1;
 
 				when Sdly =>								-- Delay State
-					if cache_read_complete='1' then 
+					if cache_read_complete = '1' then 
 						state <= delaystate;
 					else 
 						state <= Sdly;

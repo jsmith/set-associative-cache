@@ -31,7 +31,8 @@ port( sys_clk								:	in std_logic;
 		D_mem_addr									: out std_logic_vector(11 downto 0); 
 		D_cpu_read,D_cpu_write					: out std_logic;
 		D_block_out: out std_logic_vector(63 downto 0);
-		D_block_addr: out std_logic_vector(11 downto 0)
+		D_block_addr: out std_logic_vector(11 downto 0);
+		D_mem_read: out std_logic
 		
 		-- end debug variables	
 );
@@ -96,7 +97,8 @@ Unit2: cache port map(
 	write_complete,
 	
 	D_block_out,
-	D_block_addr
+	D_block_addr,
+	D_mem_read
 );
 
 -- Debug signals: output to upper level for simulation purpose only

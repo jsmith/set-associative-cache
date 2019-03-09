@@ -208,19 +208,20 @@ end component;
 
 component cache is
 port ( 	
-		clock: in std_logic;
-		rst: in std_logic;
-		cpu_read: in std_logic;
-		cpu_write: in std_logic;
-		cpu_addr: in std_logic_vector(11 downto 0);
-		data_in: in std_logic_vector(15 downto 0);
-		data_out: out std_logic_vector(15 downto 0);
-		read_complete: out std_logic;
-		write_complete: out std_logic;
-		
-		-- Debug Signals
-		D_block_out: out std_logic_vector(63 downto 0);
-		D_block_addr: out std_logic_vector(11 downto 0)
+	clock: in std_logic;
+	rst: in std_logic;
+	cpu_read: in std_logic;
+	cpu_write: in std_logic;
+	cpu_addr: in std_logic_vector(11 downto 0);
+	data_in: in std_logic_vector(15 downto 0);
+	data_out: out std_logic_vector(15 downto 0);
+	read_complete: out std_logic;
+	write_complete: out std_logic;
+	
+	-- Debug Signals
+	D_block_out: out std_logic_vector(63 downto 0);
+	D_block_addr: out std_logic_vector(11 downto 0);
+	D_mem_read: out std_logic
 );
 end component;
 
