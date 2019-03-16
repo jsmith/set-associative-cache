@@ -36,7 +36,8 @@ port(
 	oe_ctrl: out std_logic;
 	
 	-- Cache signals
-	cache_read_complete: in std_logic
+	cache_read_complete: in std_logic;
+	cache_write_complete: in std_logic
 );
 end controller;
 
@@ -74,7 +75,7 @@ begin
 					state <= S1;
 
 				when Sdly =>								-- Delay State
-					if cache_read_complete = '1' then 
+					if cache_read_complete = '1' or cache_write_complete = '1' then 
 						state <= delaystate;
 					else 
 						state <= Sdly;

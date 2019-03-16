@@ -35,6 +35,7 @@ port(
 		oe_s		: out std_logic;
 		
 		cache_read_complete: in std_logic;
+		cache_write_complete: in std_logic;
 
 		-- Debug variables: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
@@ -90,7 +91,8 @@ port(
 	Mre_ctrl:		out std_logic;
 	Mwe_ctrl:		out std_logic;
 	oe_ctrl:		out std_logic;
-	cache_read_complete: in std_logic
+	cache_read_complete: in std_logic;
+	cache_write_complete: in std_logic
 );
 end component;
 
@@ -181,7 +183,8 @@ port(
 	Mre_cu:		out 	std_logic;
 	Mwe_cu:		out 	std_logic;
 	oe_cu:		out 	std_logic;
-	cache_read_complete: in std_logic
+	cache_read_complete: in std_logic;
+	cache_write_complete: in std_logic
 );
 end component;
 

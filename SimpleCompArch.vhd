@@ -81,6 +81,7 @@ Unit0: CPU port map (
 	 
 	 --Cache signals
 	 read_complete,
+	 write_complete,
 	 
     D_rfout_bus,
     D_RFwa,

@@ -36,7 +36,8 @@ port(
 	oe_cu: out std_logic;
 	
 	-- Cache Signals
-	cache_read_complete: in std_logic
+	cache_read_complete: in std_logic;
+	cache_write_complete: in std_logic
 );
 end ctrl_unit;
 
@@ -72,7 +73,8 @@ begin
 		oe_cu,
 		
 		-- Cache Signals
-		cache_read_complete
+		cache_read_complete,
+		cache_write_complete
 	);
 
 	U1: PC port map(
