@@ -16,7 +16,8 @@
 library	ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;   
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 use work.MP_lib.all;
 
 entity cache is
@@ -34,13 +35,20 @@ port (
 	-- Debug Signals
 	D_block_out: out std_logic_vector(63 downto 0);
 	D_block_in: out std_logic_vector(63 downto 0);
-	D_block_addr: out std_logic_vector(11 downto 0);
+	D_block_addr: out std_logic_vector(9 downto 0);
 	D_mem_read: out std_logic;
 	D_write_back: out std_logic;
 	D_hit: out std_logic;
 	D_initialized: out std_logic_vector(7 downto 0);
 	D_dirty: out std_logic_vector(7 downto 0);
-	D_lru: out std_logic_vector(7 downto 0)
+	D_lru: out std_logic_vector(7 downto 0);
+	D_set_int: out std_logic_vector(2 downto 0);
+	D_tag: out std_logic_vector(7 downto 0);
+	D_set: out std_logic_vector(1 downto 0);
+	D_word: out std_logic_vector(1 downto 0);
+	D_out_less_sig: out std_logic_vector(15 downto 0);
+	D_most_less_sig: out std_logic_vector(15 downto 0);
+	D_temp: out std_logic
 );
 end cache;
 
@@ -52,27 +60,9 @@ architecture behv of cache	is
 	type tag_type is array (0 to 7) of std_logic_vector(7 downto 0);
 	signal tmp_tags: tag_type;
 	
-	-- TODO bad naming. Shouldn't be called hit_states
-	type hit_states is (ReadHit, WriteHit, ReadMiss, HitWaitState);
-	signal current_hit_state: hit_states;
-	signal hit_state: hit_states;
-	signal miss_state: hit_states;
-	
 	signal initialized: std_logic_vector(7 downto 0);
 	signal dirty: std_logic_vector(7 downto 0);
 	signal lru: std_logic_vector(7 downto 0);
-	
-	type states is (
-		StartRead, 
-		MissRead, 
-		FinishRead, 
-		Write, 
-		WaitState, 
-		Delay, 
-		WriteFinish
-	);
-	signal state: states;
-	signal delay_state: states;
 
 	signal tag: std_logic_vector(7 downto 0);
 	signal set: std_logic_vector(1 downto 0);
@@ -86,9 +76,8 @@ architecture behv of cache	is
 	
 	signal block_out: std_logic_vector(63 downto 0);
 	signal block_in: std_logic_vector(63 downto 0);
-	signal block_addr: std_logic_vector(11 downto 0); 
+	signal block_addr: std_logic_vector(9 downto 0); 
 
-	signal is_hit: std_logic;
 	signal write_back: std_logic;
 	
 begin
@@ -102,19 +91,39 @@ begin
 	);
 
 	process(cpu_write, cpu_read, cpu_addr)
-	variable set_int: integer; -- TODO Rename this
 	variable read_line: integer; -- TODO Rename this
+	variable is_hit: std_logic;
+	variable set_int: integer; -- TODO Rename this
+
+	type states is (
+		StartRead, 
+		MissRead, 
+		FinishRead, 
+		Write, 
+		WaitState, 
+		Delay, 
+		WriteFinish
+	);
+	variable state: states;
+	variable delay_state: states;
+	
+	type response_states is (ReadHit, WriteHit, ReadMiss, HitWaitState);
+	variable response_state: response_states;
+	variable hit_state: response_states;
+	variable miss_state: response_states;
 	begin
 		-- Initialize signals for operations
 		tag <= cpu_addr(11 downto 4);
 		set <= cpu_addr(3 downto 2);
 		word <= cpu_addr(1 downto 0);
-		block_addr <= cpu_addr(11 downto 2) & "00";
+		block_addr <= cpu_addr(11 downto 2);
 		
 		if (rst = '1') then
 			tmp_cache <= (others => x"0000000000000000");
-			state <= WaitState;
-			current_hit_state <= HitWaitState;
+			state := WaitState;
+			response_state := HitWaitState;
+			miss_state := HitWaitState;
+			hit_state := HitWaitState;
 			initialized <= x"00";
 			dirty <= x"00";
 			tmp_tags <= (others => x"00");
@@ -123,36 +132,36 @@ begin
 			read_complete <= '0';
 			write_complete <= '0';
 			prev_cpu_read <= '0';
-			prev_cpu_write <= '0';	
+			prev_cpu_write <= '0';
+			D_temp <= '0';
 		elsif (clock'event and clock='1') then
 			-- Cache read
 			set_int := conv_integer(set) * 2;
-
+			D_set_int <= std_logic_vector(to_unsigned(set_int, 3));
+			
 			-- The following two if statements check for events on the read and write signals
 			-- If the signal -> 1, then start the read / write process
 			-- else the signal -> 0, meaning we should stop cache execution by putting it in a wait state
 			-- This is important since we moved the state machine out of the if statements
 			if prev_cpu_read /= cpu_read then
 				if cpu_read = '1' and cpu_write = '0' then
-					set_int := conv_integer(set) * 2;
-					state <= StartRead;
+					state := StartRead;
+					hit_state := ReadHit;
+					miss_state := ReadMiss;
 				else
 					read_complete <= '0'; -- TODO Is this the right location?
-					state <= WaitState;					
+					state := WaitState;					
 				end if;
 			end if;
 
 			if prev_cpu_write /= cpu_write then
 				if cpu_write = '1' and cpu_read = '0' then
-					set_int := conv_integer(set) * 2;
-					state <= StartRead;
-					hit_state <= WriteHit;
-					miss_state <= WriteHit;
+					state := StartRead;
+					hit_state := WriteHit;
+					miss_state := WriteHit;
 				else
 					read_complete <= '0'; -- TODO Same thing here. I think there is a better location.
-					state <= WaitState;
-					hit_state <= ReadHit;
-					miss_state <= ReadMiss;			
+					state := WaitState;			
 				end if;
 			end if;
 
@@ -164,15 +173,17 @@ begin
 					-- Check "Hit"
 					-- loop 0 and 1
 
-					is_hit <= '0';
+					is_hit := '0';
+					D_hit <= '0';
 					for i in 0 to 1 loop
 						if tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1' then
-							current_hit_state <= hit_state;
+							response_state := hit_state;
 							read_line := set_int + i;
 							lru(set_int + i) <= '1';
 							lru((set_int + i + 1) mod 2) <= '0';
-							state <= WaitState;
-							is_hit <= '1';
+							state := WaitState;
+							is_hit := '1';
+							D_hit <= '1';
 							exit;
 						end if;
 					end loop;
@@ -213,31 +224,34 @@ begin
 							end if;
 						end if;
 						
+						lru(read_line) <= '1';
+						lru((read_line + 1) mod 2) <= '0';
+						
 						if write_back = '1' then
 							mem_write <= '1';
 							block_in <= tmp_cache(read_line);
-							state <= Write;
+							state := Write;
 						else
 							mem_read <= '1';
-							state <= MissRead;
+							state := MissRead;
 						end if;
 					end if;
 				
 				when Write =>
-					delay_state <= WriteFinish;
-					state <= Delay;
+					delay_state := WriteFinish;
+					state := Delay;
 				
 				when WriteFinish =>
 					mem_write <= '0';
 					mem_read <= '1';
-					state <= MissRead;
+					state := MissRead;
 
 				when MissRead =>
-					delay_state <= FinishRead;
-					state <= Delay;
+					delay_state := FinishRead;
+					state := Delay;
 				
 				when Delay =>
-					state <= delay_state;
+					state := delay_state;
 
 				when FinishRead =>
 					tmp_cache(read_line) <= block_out;
@@ -246,43 +260,46 @@ begin
 					lru(read_line) <= '0';
 					tmp_tags(read_line) <= tag;
 
-					current_hit_state <= miss_state;
+					response_state := miss_state;
 					
 					mem_read <= '0';
-					state <= WaitState;
+					state := WaitState;
 				when WaitState =>
 			end case;
 			
-			case current_hit_state is
+			case response_state is
 				when ReadHit =>
 					read_complete <= '1';
+					D_temp <= '1';
 					case word is
 						when "00" =>
-							data_out <= tmp_cache(read_line)(63 downto 48);
-						when "01" =>
-							data_out <= tmp_cache(read_line)(47 downto 32);
-						when "10" =>
-							data_out <= tmp_cache(read_line)(31 downto 16);
-						when "11" =>
 							data_out <= tmp_cache(read_line)(15 downto 00);
-          end case;
-          current_hit_state <= HitWaitState;
+						when "01" =>
+							data_out <= tmp_cache(read_line)(31 downto 16);
+						when "10" =>
+							data_out <= tmp_cache(read_line)(47 downto 32);
+						when "11" =>
+							data_out <= tmp_cache(read_line)(63 downto 48);
+					end case;
+					response_state := HitWaitState;
 				when WriteHit =>
 					dirty(set_int) <= '1';
 					write_complete <= '1';
 					-- TODO Order might be whack
 					case word is
 						when "00" => 
-							tmp_cache(read_line)(63 downto 48) <= data_in;
-						when "01" => 
-							tmp_cache(read_line)(47 downto 32) <= data_in;
-						when "10" => 
-							tmp_cache(read_line)(31 downto 16) <= data_in;
-						when "11" => 
 							tmp_cache(read_line)(15 downto 00) <= data_in;
-          end case;
-          current_hit_state <= HitWaitState;
+						when "01" => 
+							tmp_cache(read_line)(31 downto 16) <= data_in;
+						when "10" => 
+							tmp_cache(read_line)(47 downto 32) <= data_in;
+						when "11" => 
+							tmp_cache(read_line)(63 downto 48) <= data_in;
+					 end case;
+					 response_state := HitWaitState;
 				when ReadMiss =>
+					D_out_less_sig <= block_out(15 downto 00);
+					D_most_less_sig <= block_out(63 downto 48);
 					read_complete <= '1';
 					case word is
 						when "00" =>
@@ -293,8 +310,8 @@ begin
 							data_out <= block_out(47 downto 32);	
 						when "11" =>
 							data_out <= block_out(63 downto 48);
-          end case;
-          current_hit_state <= HitWaitState;
+					 end case;
+					 response_state := HitWaitState;
 				when HitWaitState =>
 					-- DO Nothing
 			end case;
@@ -307,8 +324,12 @@ begin
 	D_block_addr <= block_addr;
 	D_mem_read <= mem_read;
 	D_write_back <= write_back;
-	D_hit <= is_hit;
+--	D_hit <= is_hit;
 	D_initialized <= initialized;
 	D_dirty <= dirty;
 	D_lru <= lru;
+--	D_set_int <= std_logic_vector(to_unsigned(set_int, 3));
+	D_tag <= tag;
+	D_set <= set;
+	D_word <= word;
 end behv;

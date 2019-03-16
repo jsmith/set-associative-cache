@@ -32,13 +32,22 @@ port( sys_clk								:	in std_logic;
 		D_cpu_read,D_cpu_write					: out std_logic;
 		D_block_out: out std_logic_vector(63 downto 0);
 		D_block_in: out std_logic_vector(63 downto 0);
-		D_block_addr: out std_logic_vector(11 downto 0);
+		D_block_addr: out std_logic_vector(9 downto 0);
 		D_mem_read: out std_logic;
 		D_write_back: out std_logic;
 		D_hit: out std_logic;
 		D_initialized: out std_logic_vector(7 downto 0);
 		D_dirty: out std_logic_vector(7 downto 0);
-		D_lru: out std_logic_vector(7 downto 0)
+		D_lru: out std_logic_vector(7 downto 0);
+		D_read_complete: out std_logic;
+		D_write_complete: out std_logic;
+		D_set_int: out std_logic_vector(2 downto 0);
+		D_tag: out std_logic_vector(7 downto 0);
+		D_set: out std_logic_vector(1 downto 0);
+		D_word: out std_logic_vector(1 downto 0);
+		D_out_less_sig: out std_logic_vector(15 downto 0);
+		D_most_less_sig: out std_logic_vector(15 downto 0);
+		D_temp: out std_logic
 		
 		-- end debug variables	
 );
@@ -110,7 +119,14 @@ Unit2: cache port map(
 	D_hit,
 	D_initialized,
 	D_dirty,
-	D_lru
+	D_lru,
+	D_set_int,
+	D_tag,
+	D_set,
+	D_word,
+	D_out_less_sig,
+	D_most_less_sig,
+	D_temp
 );
 
 -- Debug signals: output to upper level for simulation purpose only
@@ -119,6 +135,8 @@ Unit2: cache port map(
 	D_mem_addr <= mem_addr; 
 	D_cpu_read <= cpu_read;
 	D_cpu_write <= cpu_write;
+	D_read_complete <= read_complete;
+	D_write_complete <= write_complete;
 -- end debug variables		
 		
 end rtl;

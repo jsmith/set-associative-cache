@@ -106,7 +106,7 @@ end component;
 component m4k_ram IS
 	PORT
 	(
-		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
+		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
 		data		: IN STD_LOGIC_VECTOR (63 DOWNTO 0);
 		rden		: IN STD_LOGIC  := '1';
@@ -221,13 +221,20 @@ port (
 	-- Debug Signals
 	D_block_out: out std_logic_vector(63 downto 0);
 	D_block_in: out std_logic_vector(63 downto 0);
-	D_block_addr: out std_logic_vector(11 downto 0);
+	D_block_addr: out std_logic_vector(9 downto 0);
 	D_mem_read: out std_logic;
 	D_write_back: out std_logic;
 	D_hit: out std_logic;
 	D_initialized: out std_logic_vector(7 downto 0);
 	D_dirty: out std_logic_vector(7 downto 0);
-	D_lru: out std_logic_vector(7 downto 0)
+	D_lru: out std_logic_vector(7 downto 0);
+	D_set_int: out std_logic_vector(2 downto 0);
+	D_tag: out std_logic_vector(7 downto 0);
+	D_set: out std_logic_vector(1 downto 0);
+	D_word: out std_logic_vector(1 downto 0);
+	D_out_less_sig: out std_logic_vector(15 downto 0);
+	D_most_less_sig: out std_logic_vector(15 downto 0);
+	D_temp: out std_logic
 );
 end component;
 
