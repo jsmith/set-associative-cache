@@ -47,7 +47,8 @@ port( sys_clk								:	in std_logic;
 		D_word: out std_logic_vector(1 downto 0);
 		D_out_less_sig: out std_logic_vector(15 downto 0);
 		D_most_less_sig: out std_logic_vector(15 downto 0);
-		D_temp: out std_logic
+		D_temp: out std_logic;
+		D_target_line: out std_logic_vector(2 downto 0)
 		
 		-- end debug variables	
 );
@@ -127,7 +128,8 @@ Unit2: cache port map(
 	D_word,
 	D_out_less_sig,
 	D_most_less_sig,
-	D_temp
+	D_temp,
+	D_target_line
 );
 
 -- Debug signals: output to upper level for simulation purpose only

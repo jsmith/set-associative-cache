@@ -237,7 +237,8 @@ port (
 	D_word: out std_logic_vector(1 downto 0);
 	D_out_less_sig: out std_logic_vector(15 downto 0);
 	D_most_less_sig: out std_logic_vector(15 downto 0);
-	D_temp: out std_logic
+	D_temp: out std_logic;
+	D_target_line: out std_logic_vector(2 downto 0)
 );
 end component;
 

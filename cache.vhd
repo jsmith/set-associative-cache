@@ -48,7 +48,8 @@ port (
 	D_word: out std_logic_vector(1 downto 0);
 	D_out_less_sig: out std_logic_vector(15 downto 0);
 	D_most_less_sig: out std_logic_vector(15 downto 0);
-	D_temp: out std_logic
+	D_temp: out std_logic;
+	D_target_line: out std_logic_vector(2 downto 0)
 );
 end cache;
 
@@ -91,7 +92,7 @@ begin
 	);
 
 	process(cpu_write, cpu_read, cpu_addr)
-	variable read_line: integer; -- TODO Rename this
+	variable target_line: integer;
 	variable is_hit: std_logic;
 	variable set_int: integer; -- TODO Rename this
 
@@ -178,7 +179,7 @@ begin
 					for i in 0 to 1 loop
 						if tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1' then
 							response_state := hit_state;
-							read_line := set_int + i;
+							target_line := set_int + i;
 							lru(set_int + i) <= '1';
 							lru((set_int + i + 1) mod 2) <= '0';
 							state := WaitState;
@@ -203,39 +204,43 @@ begin
 						
 						write_back <= '0';
 						if initialized(set_int) = '0' then
-							read_line := set_int;
+							target_line := set_int;
 						elsif initialized(set_int + 1) = '0' then
-							read_line := set_int + 1;
+							target_line := set_int + 1;
 						elsif dirty(set_int) = dirty(set_int + 1) then
 							-- Ok so they are either both dirty or both not dirty
 							-- set write_back to one of the dirty values (they will both be the same)
 							write_back <= dirty(set_int);
 
 							if lru(set_int) = '1' then
-								read_line := set_int + 1;
+								target_line := set_int + 1;
 							else
-								read_line := set_int;
+								target_line := set_int;
 							end if;
 						else
 							if dirty(set_int) = '1' then
-								read_line := set_int + 1;
+								target_line := set_int + 1;
 							else
-								read_line := set_int;
+								target_line := set_int;
 							end if;
 						end if;
+							
 						
-						lru(read_line) <= '1';
-						lru((read_line + 1) mod 2) <= '0';
+						lru(target_line) <= '1';
+						lru((target_line + 1) mod 2) <= '0'; -- A little trick to set the other line in the set to 0
 						
 						if write_back = '1' then
 							mem_write <= '1';
-							block_in <= tmp_cache(read_line);
+							block_in <= tmp_cache(target_line);
 							state := Write;
 						else
 							mem_read <= '1';
 							state := MissRead;
 						end if;
 					end if;
+					
+					-- Output the target line
+					D_target_line <= std_logic_vector(to_unsigned(set_int, D_target_line'length));
 				
 				when Write =>
 					delay_state := WriteFinish;
@@ -247,6 +252,7 @@ begin
 					state := MissRead;
 
 				when MissRead =>
+					-- TODO Can we remove this state?
 					delay_state := FinishRead;
 					state := Delay;
 				
@@ -254,11 +260,10 @@ begin
 					state := delay_state;
 
 				when FinishRead =>
-					tmp_cache(read_line) <= block_out;
-					dirty(read_line) <= '0';
-					initialized(read_line) <= '1';
-					lru(read_line) <= '0';
-					tmp_tags(read_line) <= tag;
+					tmp_cache(target_line) <= block_out;
+					dirty(target_line) <= '0';
+					initialized(target_line) <= '1';
+					tmp_tags(target_line) <= tag;
 
 					response_state := miss_state;
 					
@@ -273,13 +278,13 @@ begin
 					D_temp <= '1';
 					case word is
 						when "00" =>
-							data_out <= tmp_cache(read_line)(15 downto 00);
+							data_out <= tmp_cache(target_line)(15 downto 00);
 						when "01" =>
-							data_out <= tmp_cache(read_line)(31 downto 16);
+							data_out <= tmp_cache(target_line)(31 downto 16);
 						when "10" =>
-							data_out <= tmp_cache(read_line)(47 downto 32);
+							data_out <= tmp_cache(target_line)(47 downto 32);
 						when "11" =>
-							data_out <= tmp_cache(read_line)(63 downto 48);
+							data_out <= tmp_cache(target_line)(63 downto 48);
 					end case;
 					response_state := HitWaitState;
 				when WriteHit =>
@@ -288,13 +293,13 @@ begin
 					-- TODO Order might be whack
 					case word is
 						when "00" => 
-							tmp_cache(read_line)(15 downto 00) <= data_in;
+							tmp_cache(target_line)(15 downto 00) <= data_in;
 						when "01" => 
-							tmp_cache(read_line)(31 downto 16) <= data_in;
+							tmp_cache(target_line)(31 downto 16) <= data_in;
 						when "10" => 
-							tmp_cache(read_line)(47 downto 32) <= data_in;
+							tmp_cache(target_line)(47 downto 32) <= data_in;
 						when "11" => 
-							tmp_cache(read_line)(63 downto 48) <= data_in;
+							tmp_cache(target_line)(63 downto 48) <= data_in;
 					 end case;
 					 response_state := HitWaitState;
 				when ReadMiss =>
