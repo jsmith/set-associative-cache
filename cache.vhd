@@ -92,7 +92,7 @@ begin
 	process(cpu_write, cpu_read, cpu_addr)
 	variable target_line: integer;
 	variable is_hit: std_logic;
-	variable set_int: integer; -- TODO Rename this
+	variable set_int: integer;
 	variable write_back: std_logic;
 
 	type states is (
@@ -236,7 +236,15 @@ begin
 					
 					-- This will update the LRU whether there is a hit or miss
 					lru(target_line) <= '1';
-					lru((target_line + 1) mod 2) <= '0'; -- A little trick to set the other line in the set to 0
+
+					-- A little trick to set the other line in the set to 0
+					-- For example, if target_line = 0, set lru(1) <= '0'
+					-- And if target_line = 1, set lru(0) <= '0'
+					if target_line mod 2 = 0 then
+						lru(target_line + 1) <= '0';
+					else
+						lru(target_line - 1) <= '0';
+					end if;
 					
 					-- Output the debug signals here because we are using variables
 					D_target_line <= std_logic_vector(to_unsigned(target_line, D_target_line'length));
