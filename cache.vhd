@@ -37,6 +37,7 @@ port (
 	D_block_in: out std_logic_vector(63 downto 0);
 	D_block_addr: out std_logic_vector(9 downto 0);
 	D_mem_read: out std_logic;
+	D_mem_write: out std_logic;
 	D_write_back: out std_logic;
 	D_hit: out std_logic;
 	D_initialized: out std_logic_vector(7 downto 0);
@@ -155,6 +156,7 @@ begin
 			if prev_cpu_write /= cpu_write then
 				if cpu_write = '1' and cpu_read = '0' then
 					state := StartRead;
+					-- The hit and miss states are the same since we take the same action whether there is a hit or miss
 					hit_state := WriteHit;
 					miss_state := WriteHit;
 				else
@@ -253,6 +255,9 @@ begin
 				when WriteFinish =>
 					mem_write <= '0';
 					mem_read <= '1';
+					-- This is just for debug purposes
+					-- We don't actually need to set this back to 0
+					D_write_back <= '0';
 					state := MissRead;
 
 				when MissRead =>
@@ -264,6 +269,8 @@ begin
 
 				when FinishRead =>
 					cache_mem(target_line) <= block_out;
+					-- By default, set this to not dirty
+					-- If this is a write, this will be overwritten
 					dirty(target_line) <= '0';
 					initialized(target_line) <= '1';
 					tmp_tags(target_line) <= tag;
@@ -273,6 +280,7 @@ begin
 					mem_read <= '0';
 					state := WaitState;
 				when WaitState =>
+					-- Do nothing
 			end case;
 			
 			case response_state is
@@ -327,6 +335,7 @@ begin
 	D_block_in <= block_in;
 	D_block_addr <= block_addr;
 	D_mem_read <= mem_read;
+	D_mem_write <= mem_write;
 	D_initialized <= initialized;
 	D_dirty <= dirty;
 	D_lru <= lru;

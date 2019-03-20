@@ -226,6 +226,7 @@ port (
 	D_block_in: out std_logic_vector(63 downto 0);
 	D_block_addr: out std_logic_vector(9 downto 0);
 	D_mem_read: out std_logic;
+	D_mem_write: out std_logic;
 	D_write_back: out std_logic;
 	D_hit: out std_logic;
 	D_initialized: out std_logic_vector(7 downto 0);

@@ -34,6 +34,7 @@ port( sys_clk								:	in std_logic;
 		D_block_in: out std_logic_vector(63 downto 0);
 		D_block_addr: out std_logic_vector(9 downto 0);
 		D_mem_read: out std_logic;
+		D_mem_write: out std_logic;
 		D_write_back: out std_logic;
 		D_hit: out std_logic;
 		D_initialized: out std_logic_vector(7 downto 0);
@@ -114,6 +115,7 @@ Unit2: cache port map(
 	D_block_in,
 	D_block_addr,
 	D_mem_read,
+	D_mem_write,
 	D_write_back,
 	D_hit,
 	D_initialized,
