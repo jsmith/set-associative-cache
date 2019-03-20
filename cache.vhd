@@ -78,8 +78,6 @@ architecture behv of cache	is
 	signal block_out: std_logic_vector(63 downto 0);
 	signal block_in: std_logic_vector(63 downto 0);
 	signal block_addr: std_logic_vector(9 downto 0); 
-
-	signal write_back: std_logic;
 	
 begin
 	Unit1: m4k_ram port map(
@@ -95,6 +93,7 @@ begin
 	variable target_line: integer;
 	variable is_hit: std_logic;
 	variable set_int: integer; -- TODO Rename this
+	variable write_back: std_logic;
 
 	type states is (
 		StartRead, 
@@ -127,8 +126,10 @@ begin
 			hit_state := HitWaitState;
 			initialized <= x"00";
 			dirty <= x"00";
+			lru <= x"00";
 			tmp_tags <= (others => x"00");
 			mem_read <= '0';
+			mem_write <= '0';
 			block_in <= x"0000000000000000";
 			read_complete <= '0';
 			write_complete <= '0';
@@ -150,7 +151,7 @@ begin
 					hit_state := ReadHit;
 					miss_state := ReadMiss;
 				else
-					read_complete <= '0'; -- TODO Is this the right location?
+					read_complete <= '0';
 					state := WaitState;					
 				end if;
 			end if;
@@ -161,7 +162,7 @@ begin
 					hit_state := WriteHit;
 					miss_state := WriteHit;
 				else
-					read_complete <= '0'; -- TODO Same thing here. I think there is a better location.
+					read_complete <= '0';
 					state := WaitState;			
 				end if;
 			end if;
@@ -172,26 +173,22 @@ begin
 			case state is
 				when StartRead =>
 					-- Check "Hit"
-					-- loop 0 and 1
-
+					-- We loop 0 to 1 because we there are two cache lines
 					is_hit := '0';
-					D_hit <= '0';
 					for i in 0 to 1 loop
 						if tag = tmp_tags(set_int + i) and initialized(set_int + i) = '1' then
 							response_state := hit_state;
 							target_line := set_int + i;
-							lru(set_int + i) <= '1';
-							lru((set_int + i + 1) mod 2) <= '0';
 							state := WaitState;
 							is_hit := '1';
-							D_hit <= '1';
 							exit;
 						end if;
 					end loop;
-
+					
 					-- Cache "Miss"
 					if is_hit = '0' then
-
+						
+						-- The following commentes describe the line replacement algorithm
 						-- if set != initialized => replace
 						-- elif set + 1 != initialized => replace
 						-- elif (set == dirty and set + 1 == dirty) or (set != dirty and set + 1 != dirty) =>
@@ -202,7 +199,7 @@ begin
 
 						-- overwite line / move to later state as mem_read is not set to 1 yet.
 						
-						write_back <= '0';
+						write_back := '0';
 						if initialized(set_int) = '0' then
 							target_line := set_int;
 						elsif initialized(set_int + 1) = '0' then
@@ -210,7 +207,7 @@ begin
 						elsif dirty(set_int) = dirty(set_int + 1) then
 							-- Ok so they are either both dirty or both not dirty
 							-- set write_back to one of the dirty values (they will both be the same)
-							write_back <= dirty(set_int);
+							write_back := dirty(set_int);
 
 							if lru(set_int) = '1' then
 								target_line := set_int + 1;
@@ -224,10 +221,8 @@ begin
 								target_line := set_int;
 							end if;
 						end if;
-							
 						
-						lru(target_line) <= '1';
-						lru((target_line + 1) mod 2) <= '0'; -- A little trick to set the other line in the set to 0
+						D_write_back <= write_back;
 						
 						if write_back = '1' then
 							mem_write <= '1';
@@ -239,8 +234,13 @@ begin
 						end if;
 					end if;
 					
-					-- Output the target line
-					D_target_line <= std_logic_vector(to_unsigned(set_int, D_target_line'length));
+					-- This will update the LRU whether there is a hit or miss
+					lru(target_line) <= '1';
+					lru((target_line + 1) mod 2) <= '0'; -- A little trick to set the other line in the set to 0
+					
+					-- Output the debug signals here because we are using variables
+					D_target_line <= std_logic_vector(to_unsigned(target_line, D_target_line'length));
+					D_hit <= is_hit;
 				
 				when Write =>
 					delay_state := WriteFinish;
@@ -252,7 +252,6 @@ begin
 					state := MissRead;
 
 				when MissRead =>
-					-- TODO Can we remove this state?
 					delay_state := FinishRead;
 					state := Delay;
 				
@@ -328,7 +327,6 @@ begin
 	D_block_in <= block_in;
 	D_block_addr <= block_addr;
 	D_mem_read <= mem_read;
-	D_write_back <= write_back;
 --	D_hit <= is_hit;
 	D_initialized <= initialized;
 	D_dirty <= dirty;
