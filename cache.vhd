@@ -56,7 +56,7 @@ end cache;
 architecture behv of cache	is			
 
 	type cache_type is array (0 to 7) of std_logic_vector(63 downto 0);
-	signal tmp_cache: cache_type;
+	signal cache_mem: cache_type;
 	
 	type tag_type is array (0 to 7) of std_logic_vector(7 downto 0);
 	signal tmp_tags: tag_type;
@@ -119,7 +119,7 @@ begin
 		block_addr <= cpu_addr(11 downto 2);
 		
 		if (rst = '1') then
-			tmp_cache <= (others => x"0000000000000000");
+			cache_mem <= (others => x"0000000000000000");
 			state := WaitState;
 			response_state := HitWaitState;
 			miss_state := HitWaitState;
@@ -226,7 +226,7 @@ begin
 						
 						if write_back = '1' then
 							mem_write <= '1';
-							block_in <= tmp_cache(target_line);
+							block_in <= cache_mem(target_line);
 							state := Write;
 						else
 							mem_read <= '1';
@@ -259,7 +259,7 @@ begin
 					state := delay_state;
 
 				when FinishRead =>
-					tmp_cache(target_line) <= block_out;
+					cache_mem(target_line) <= block_out;
 					dirty(target_line) <= '0';
 					initialized(target_line) <= '1';
 					tmp_tags(target_line) <= tag;
@@ -277,13 +277,13 @@ begin
 					D_temp <= '1';
 					case word is
 						when "00" =>
-							data_out <= tmp_cache(target_line)(15 downto 00);
+							data_out <= cache_mem(target_line)(15 downto 00);
 						when "01" =>
-							data_out <= tmp_cache(target_line)(31 downto 16);
+							data_out <= cache_mem(target_line)(31 downto 16);
 						when "10" =>
-							data_out <= tmp_cache(target_line)(47 downto 32);
+							data_out <= cache_mem(target_line)(47 downto 32);
 						when "11" =>
-							data_out <= tmp_cache(target_line)(63 downto 48);
+							data_out <= cache_mem(target_line)(63 downto 48);
 					end case;
 					response_state := HitWaitState;
 				when WriteHit =>
@@ -292,18 +292,16 @@ begin
 					-- TODO Order might be whack
 					case word is
 						when "00" => 
-							tmp_cache(target_line)(15 downto 00) <= data_in;
+							cache_mem(target_line)(15 downto 00) <= data_in;
 						when "01" => 
-							tmp_cache(target_line)(31 downto 16) <= data_in;
+							cache_mem(target_line)(31 downto 16) <= data_in;
 						when "10" => 
-							tmp_cache(target_line)(47 downto 32) <= data_in;
+							cache_mem(target_line)(47 downto 32) <= data_in;
 						when "11" => 
-							tmp_cache(target_line)(63 downto 48) <= data_in;
+							cache_mem(target_line)(63 downto 48) <= data_in;
 					 end case;
 					 response_state := HitWaitState;
 				when ReadMiss =>
-					D_out_less_sig <= block_out(15 downto 00);
-					D_most_less_sig <= block_out(63 downto 48);
 					read_complete <= '1';
 					case word is
 						when "00" =>
