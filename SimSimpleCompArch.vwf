@@ -5948,7 +5948,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 36;
 	TREE_LEVEL = 0;
 	CHILDREN = 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48;
@@ -5958,7 +5958,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[11]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 37;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -5968,7 +5968,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[10]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 38;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -5978,7 +5978,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[9]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 39;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -5988,7 +5988,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[8]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 40;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -5998,7 +5998,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[7]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 41;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6008,7 +6008,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[6]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 42;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6018,7 +6018,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[5]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 43;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6028,7 +6028,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[4]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 44;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6038,7 +6038,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[3]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 45;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6048,7 +6048,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 46;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6058,7 +6058,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 47;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -6068,7 +6068,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_mem_addr[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Hexadecimal;
+	RADIX = Unsigned;
 	TREE_INDEX = 48;
 	TREE_LEVEL = 1;
 	PARENT = 36;
@@ -8491,7 +8491,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_target_line";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 291;
 	TREE_LEVEL = 0;
 	CHILDREN = 292, 293, 294;
@@ -8501,7 +8501,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_target_line[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 292;
 	TREE_LEVEL = 1;
 	PARENT = 291;
@@ -8511,7 +8511,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_target_line[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 293;
 	TREE_LEVEL = 1;
 	PARENT = 291;
@@ -8521,7 +8521,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "D_target_line[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 294;
 	TREE_LEVEL = 1;
 	PARENT = 291;

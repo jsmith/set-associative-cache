@@ -290,7 +290,7 @@ begin
 					end case;
 					response_state := HitWaitState;
 				when WriteHit =>
-					dirty(set_int) <= '1';
+					dirty(target_line) <= '1';
 					write_complete <= '1';
 					case word is
 						when "00" => 
