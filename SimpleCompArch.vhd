@@ -45,9 +45,6 @@ port( sys_clk								:	in std_logic;
 		D_tag: out std_logic_vector(7 downto 0);
 		D_set: out std_logic_vector(1 downto 0);
 		D_word: out std_logic_vector(1 downto 0);
-		D_out_less_sig: out std_logic_vector(15 downto 0);
-		D_most_less_sig: out std_logic_vector(15 downto 0);
-		D_temp: out std_logic;
 		D_target_line: out std_logic_vector(2 downto 0)
 		
 		-- end debug variables	
@@ -126,9 +123,6 @@ Unit2: cache port map(
 	D_tag,
 	D_set,
 	D_word,
-	D_out_less_sig,
-	D_most_less_sig,
-	D_temp,
 	D_target_line
 );
 

@@ -46,9 +46,6 @@ port (
 	D_tag: out std_logic_vector(7 downto 0);
 	D_set: out std_logic_vector(1 downto 0);
 	D_word: out std_logic_vector(1 downto 0);
-	D_out_less_sig: out std_logic_vector(15 downto 0);
-	D_most_less_sig: out std_logic_vector(15 downto 0);
-	D_temp: out std_logic;
 	D_target_line: out std_logic_vector(2 downto 0)
 );
 end cache;
@@ -135,11 +132,10 @@ begin
 			write_complete <= '0';
 			prev_cpu_read <= '0';
 			prev_cpu_write <= '0';
-			D_temp <= '0';
 		elsif (clock'event and clock='1') then
 			-- Cache read
 			set_int := conv_integer(set) * 2;
-			D_set_int <= std_logic_vector(to_unsigned(set_int, 3));
+			D_set_int <= std_logic_vector(to_unsigned(set_int, D_set_int'length));
 			
 			-- The following two if statements check for events on the read and write signals
 			-- If the signal -> 1, then start the read / write process
@@ -162,7 +158,7 @@ begin
 					hit_state := WriteHit;
 					miss_state := WriteHit;
 				else
-					read_complete <= '0';
+					write_complete <= '0';
 					state := WaitState;			
 				end if;
 			end if;
@@ -282,7 +278,6 @@ begin
 			case response_state is
 				when ReadHit =>
 					read_complete <= '1';
-					D_temp <= '1';
 					case word is
 						when "00" =>
 							data_out <= cache_mem(target_line)(15 downto 00);
@@ -297,7 +292,6 @@ begin
 				when WriteHit =>
 					dirty(set_int) <= '1';
 					write_complete <= '1';
-					-- TODO Order might be whack
 					case word is
 						when "00" => 
 							cache_mem(target_line)(15 downto 00) <= data_in;
@@ -333,11 +327,9 @@ begin
 	D_block_in <= block_in;
 	D_block_addr <= block_addr;
 	D_mem_read <= mem_read;
---	D_hit <= is_hit;
 	D_initialized <= initialized;
 	D_dirty <= dirty;
 	D_lru <= lru;
---	D_set_int <= std_logic_vector(to_unsigned(set_int, 3));
 	D_tag <= tag;
 	D_set <= set;
 	D_word <= word;
