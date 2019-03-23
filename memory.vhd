@@ -1,85 +1,83 @@
---------------------------------------------------------
--- SSimple Computer Architecture
---
--- memory 256*16
--- 8 bit address; 16 bit data
--- memory.vhd
---------------------------------------------------------
-
-library	ieee;
-use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;   
+library ieee;
+use ieee.std_logic_1164.all;  
+use ieee.numeric_std.all;			   
 use work.MP_lib.all;
 
 entity memory is
-port ( 	clock	: 	in std_logic;
-		rst		: 	in std_logic;
-		Mre		:	in std_logic;
-		Mwe		:	in std_logic;
-		address	:	in std_logic_vector(7 downto 0);
-		data_in	:	in std_logic_vector(15 downto 0);
-		data_out:	out std_logic_vector(15 downto 0)
+port(
+	clock: in std_logic;
+	reset: in std_logic;
+	rden: in std_logic;
+	wren: in std_logic;
+	address: in std_logic_vector(11 downto 0);
+	data_in: in std_logic_vector(15 downto 0);
+	data_out: out std_logic_vector(15 downto 0);
+	read_done: out std_logic;
+	write_done: out std_logic
 );
 end memory;
 
-architecture behv of memory	 is			
+architecture bhv of memory is
 
-type ram_type is array (0 to 255) of std_logic_vector(15 downto 0);
-signal tmp_ram: ram_type;
+constant delay: integer := 11;
+signal read_counter: integer := 0;
+signal write_counter: integer := 0;
+signal m4k_in: std_logic_vector(15 downto 0);
+signal m4k_out: std_logic_vector(15 downto 0);
+
 begin
-	write: process(clock, rst, Mre, address, data_in)
-	begin
-		-- program to generate 10 fabonacci number
-		if rst='1' then		
-			tmp_ram <= (
-				-- Do initial setup.
-				0 => x"3001",
-				1 => x"3132",
-				2 => x"32C8",
-				3 => x"4312",
-				4 => x"2320",
-				5 => x"5220",
-				6 => x"0433",
-				7 => x"6403",
-				8 => x"7000",
-				9 => x"3196",
-				10 => x"32FA",
-				11 => x"A410",
-				12 => x"A520",
-				13 => x"5454",
-				14 => x"2140",
-				15 => x"5110",
-				16 => x"5220",
-				17 => x"0332",
-				18 => x"630B",
-				19 => x"7032",
-				20 => x"7033",
-				21 => x"703C",
-				22 => x"7046",
-				23 => x"7050",
-				24 => x"F000",
-				
-				others => x"0000");
-		else
-			if (clock'event and clock = '1') then
-				if (Mwe ='1' and Mre = '0') then
-					tmp_ram(conv_integer(address)) <= data_in;
-				end if;
-			end if;
-		end if;
-	end process;
+Unit0: m4k_ram port map(
+	address,
+	clock,
+	m4k_in,
+	rden,
+	wren,
+	data_out
+);
 
-    read: process(clock, rst, Mwe, address)
-	begin
-		if rst='1' then
-			data_out <= ZERO;
-		else
+read: process(clock, reset, rden)
+begin
+	if reset = '1' then
+		-- data_out <= std_logic_vector(to_unsigned(0,16));
+		read_done <= '0';
+		read_counter <= 0;
+	else
+		if (rden = '1' and wren = '0') then
 			if (clock'event and clock = '1') then
-				if (Mre ='1' and Mwe ='0') then								 
-					data_out <= tmp_ram(conv_integer(address));
+				if (read_counter = delay) then
+					-- data_out <= m4k_out;
+					read_done <= '1';
+				else
+					read_counter <= read_counter + 1;
 				end if;
 			end if;
+		else
+			read_done <= '0';
+			read_counter <= 0;
 		end if;
-	end process;
-end behv;
+	end if;
+end process;
+
+write: process(clock, reset, wren)
+begin
+	if reset = '1' then
+		write_done <= '0';
+		write_counter <= 0;
+	else
+		if (wren = '1' and rden = '0') then
+			if (clock'event and clock = '1') then
+				if (write_counter = delay) then
+					m4k_in <= data_in;
+					write_done <= '1';
+				else
+					write_counter <= write_counter + 1;
+				end if;
+			end if;
+		else
+			write_done <= '0';
+			write_counter <= 0;
+		end if;
+	end if;
+end process;
+
+end bhv;

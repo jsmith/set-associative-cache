@@ -1,8 +1,8 @@
 /*<simulation_settings>
-<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SimpleCompArch -c SimpleCompArch --vector_source="C:/TEMP/SimpleCompArch2019/SimSimpleCompArch.vwf" --testbench_file="C:/TEMP/SimpleCompArch2019/simulation/qsim/SimSimpleCompArch.vwf.vht"</ftestbench_cmd>
-<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SimpleCompArch -c SimpleCompArch --vector_source="C:/TEMP/SimpleCompArch2019/SimSimpleCompArch.vwf" --testbench_file="C:/TEMP/SimpleCompArch2019/simulation/qsim/SimSimpleCompArch.vwf.vht"</ttestbench_cmd>
-<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/TEMP/SimpleCompArch2019/simulation/qsim/" SimpleCompArch -c SimpleCompArch</fnetlist_cmd>
-<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/TEMP/SimpleCompArch2019/simulation/qsim/" SimpleCompArch -c SimpleCompArch</tnetlist_cmd>
+<ftestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SimpleCompArch -c SimpleCompArch --vector_source="C:/embedded/set-associative-cache/SimSimpleCompArch.vwf" --testbench_file="C:/embedded/set-associative-cache/simulation/qsim/SimSimpleCompArch.vwf.vht"</ftestbench_cmd>
+<ttestbench_cmd>quartus_eda --gen_testbench --tool=modelsim_oem --format=vhdl --write_settings_files=off SimpleCompArch -c SimpleCompArch --vector_source="C:/embedded/set-associative-cache/SimSimpleCompArch.vwf" --testbench_file="C:/embedded/set-associative-cache/simulation/qsim/SimSimpleCompArch.vwf.vht"</ttestbench_cmd>
+<fnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=on --flatten_buses=off --tool=modelsim_oem --format=vhdl --output_directory="C:/embedded/set-associative-cache/simulation/qsim/" SimpleCompArch -c SimpleCompArch</fnetlist_cmd>
+<tnetlist_cmd>quartus_eda --write_settings_files=off --simulation --functional=off --flatten_buses=off --timescale=1ps --tool=modelsim_oem --format=vhdl --output_directory="C:/embedded/set-associative-cache/simulation/qsim/" SimpleCompArch -c SimpleCompArch</tnetlist_cmd>
 <modelsim_script>onerror {exit -code 1}
 vlib work
 vcom -work work SimpleCompArch.vho
@@ -20,6 +20,8 @@ proc simTimestamp {} {
 after 2500 simTimestamp
 run -all
 quit -f
+
+
 
 
 
@@ -43,6 +45,8 @@ proc simTimestamp {} {
 after 2500 simTimestamp
 run -all
 quit -f
+
+
 
 
 
@@ -79,7 +83,7 @@ HEADER
 	VERSION = 1;
 	TIME_UNIT = ns;
 	DATA_OFFSET = 0.0;
-	DATA_DURATION = 40000.0;
+	DATA_DURATION = 70000.0;
 	SIMULATION_TIME = 0.0;
 	GRID_PHASE = 0.0;
 	GRID_PERIOD = 10.0;
@@ -746,6 +750,46 @@ SIGNAL("D_mdin_bus[0]")
 	PARENT = "D_mdin_bus";
 }
 
+SIGNAL("D_Mre")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("D_Mwe")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("D_read_done")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
+SIGNAL("D_write_done")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
 TRANSITION_LIST("sys_clk")
 {
 	NODE
@@ -753,9 +797,9 @@ TRANSITION_LIST("sys_clk")
 		REPEAT = 1;
 		NODE
 		{
-			REPEAT = 4000;
-			LEVEL 0 FOR 5.0;
-			LEVEL 1 FOR 5.0;
+			REPEAT = 35000;
+			LEVEL 0 FOR 1.0;
+			LEVEL 1 FOR 1.0;
 		}
 	}
 }
@@ -766,7 +810,7 @@ TRANSITION_LIST("sys_rst")
 	{
 		REPEAT = 1;
 		LEVEL 1 FOR 40.0;
-		LEVEL 0 FOR 39960.0;
+		LEVEL 0 FOR 69960.0;
 	}
 }
 
@@ -776,7 +820,7 @@ TRANSITION_LIST("sys_output[15]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -786,7 +830,7 @@ TRANSITION_LIST("sys_output[14]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -796,7 +840,7 @@ TRANSITION_LIST("sys_output[13]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -806,7 +850,7 @@ TRANSITION_LIST("sys_output[12]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -816,7 +860,7 @@ TRANSITION_LIST("sys_output[11]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -826,7 +870,7 @@ TRANSITION_LIST("sys_output[10]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -836,7 +880,7 @@ TRANSITION_LIST("sys_output[9]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -846,7 +890,7 @@ TRANSITION_LIST("sys_output[8]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -856,7 +900,7 @@ TRANSITION_LIST("sys_output[7]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -866,7 +910,7 @@ TRANSITION_LIST("sys_output[6]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -876,7 +920,7 @@ TRANSITION_LIST("sys_output[5]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -886,7 +930,7 @@ TRANSITION_LIST("sys_output[4]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -896,7 +940,7 @@ TRANSITION_LIST("sys_output[3]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -906,7 +950,7 @@ TRANSITION_LIST("sys_output[2]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -916,7 +960,7 @@ TRANSITION_LIST("sys_output[1]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -926,7 +970,7 @@ TRANSITION_LIST("sys_output[0]")
 	{
 		REPEAT = 1;
 		LEVEL X FOR 2999.0;
-		LEVEL 0 FOR 37001.0;
+		LEVEL 0 FOR 67001.0;
 	}
 }
 
@@ -935,7 +979,8 @@ TRANSITION_LIST("D_mdout_bus[15]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -944,7 +989,8 @@ TRANSITION_LIST("D_mdout_bus[14]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -953,7 +999,8 @@ TRANSITION_LIST("D_mdout_bus[13]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -962,7 +1009,8 @@ TRANSITION_LIST("D_mdout_bus[12]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -971,7 +1019,8 @@ TRANSITION_LIST("D_mdout_bus[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -980,7 +1029,8 @@ TRANSITION_LIST("D_mdout_bus[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -989,7 +1039,8 @@ TRANSITION_LIST("D_mdout_bus[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -998,7 +1049,8 @@ TRANSITION_LIST("D_mdout_bus[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1007,7 +1059,8 @@ TRANSITION_LIST("D_mdout_bus[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1016,7 +1069,8 @@ TRANSITION_LIST("D_mdout_bus[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1025,7 +1079,8 @@ TRANSITION_LIST("D_mdout_bus[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1034,7 +1089,8 @@ TRANSITION_LIST("D_mdout_bus[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1043,7 +1099,8 @@ TRANSITION_LIST("D_mdout_bus[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1052,7 +1109,8 @@ TRANSITION_LIST("D_mdout_bus[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1061,7 +1119,8 @@ TRANSITION_LIST("D_mdout_bus[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1070,7 +1129,8 @@ TRANSITION_LIST("D_mdout_bus[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1079,7 +1139,8 @@ TRANSITION_LIST("D_mem_addr[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1088,7 +1149,8 @@ TRANSITION_LIST("D_mem_addr[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1097,7 +1159,8 @@ TRANSITION_LIST("D_mem_addr[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1106,7 +1169,8 @@ TRANSITION_LIST("D_mem_addr[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1115,7 +1179,8 @@ TRANSITION_LIST("D_mem_addr[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1124,7 +1189,8 @@ TRANSITION_LIST("D_mem_addr[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1133,7 +1199,8 @@ TRANSITION_LIST("D_mem_addr[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1142,7 +1209,8 @@ TRANSITION_LIST("D_mem_addr[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1151,7 +1219,8 @@ TRANSITION_LIST("D_mem_addr[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1160,7 +1229,8 @@ TRANSITION_LIST("D_mem_addr[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1169,7 +1239,8 @@ TRANSITION_LIST("D_mem_addr[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1178,7 +1249,8 @@ TRANSITION_LIST("D_mem_addr[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1187,7 +1259,8 @@ TRANSITION_LIST("D_mdin_bus[15]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1196,7 +1269,8 @@ TRANSITION_LIST("D_mdin_bus[14]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1205,7 +1279,8 @@ TRANSITION_LIST("D_mdin_bus[13]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1214,7 +1289,8 @@ TRANSITION_LIST("D_mdin_bus[12]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1223,7 +1299,8 @@ TRANSITION_LIST("D_mdin_bus[11]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1232,7 +1309,8 @@ TRANSITION_LIST("D_mdin_bus[10]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1241,7 +1319,8 @@ TRANSITION_LIST("D_mdin_bus[9]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1250,7 +1329,8 @@ TRANSITION_LIST("D_mdin_bus[8]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1259,7 +1339,8 @@ TRANSITION_LIST("D_mdin_bus[7]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1268,7 +1349,8 @@ TRANSITION_LIST("D_mdin_bus[6]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1277,7 +1359,8 @@ TRANSITION_LIST("D_mdin_bus[5]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1286,7 +1369,8 @@ TRANSITION_LIST("D_mdin_bus[4]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1295,7 +1379,8 @@ TRANSITION_LIST("D_mdin_bus[3]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1304,7 +1389,8 @@ TRANSITION_LIST("D_mdin_bus[2]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1313,7 +1399,8 @@ TRANSITION_LIST("D_mdin_bus[1]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1322,7 +1409,48 @@ TRANSITION_LIST("D_mdin_bus[0]")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL X FOR 40000.0;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
+	}
+}
+
+TRANSITION_LIST("D_Mre")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
+	}
+}
+
+TRANSITION_LIST("D_Mwe")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
+	}
+}
+
+TRANSITION_LIST("D_read_done")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
+	}
+}
+
+TRANSITION_LIST("D_write_done")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 39999.0;
+		LEVEL 0 FOR 30001.0;
 	}
 }
 
@@ -1982,6 +2110,42 @@ DISPLAY_LINE
 	TREE_INDEX = 65;
 	TREE_LEVEL = 1;
 	PARENT = 49;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "D_Mre";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 66;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "D_Mwe";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 67;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "D_read_done";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 68;
+	TREE_LEVEL = 0;
+}
+
+DISPLAY_LINE
+{
+	CHANNEL = "D_write_done";
+	EXPAND_STATUS = COLLAPSED;
+	RADIX = Binary;
+	TREE_INDEX = 69;
+	TREE_LEVEL = 0;
 }
 
 TIME_BAR

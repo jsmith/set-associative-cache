@@ -33,7 +33,9 @@ port(
 	ALUs_cu: out std_logic_vector(3 downto 0);
 	Mre_cu: out std_logic;
 	Mwe_cu: out std_logic;
-	oe_cu: out std_logic
+	oe_cu: out std_logic;
+	read_done: in std_logic;
+	write_done: in std_logic
 );
 end ctrl_unit;
 
@@ -66,7 +68,9 @@ begin
 		Ms_sig,
 		Mre_cu,
 		Mwe_cu,
-		oe_cu
+		oe_cu,
+		read_done,
+		write_done
 	);
 
 	U1: PC port map(

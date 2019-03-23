@@ -29,7 +29,8 @@ port( sys_clk								:	in std_logic;
 		-- Debug signals from Memory: output for simulation purpose only	
 		D_mdout_bus,D_mdin_bus					: out std_logic_vector(15 downto 0); 
 		D_mem_addr									: out std_logic_vector(11 downto 0); 
-		D_Mre,D_Mwe									: out std_logic 
+		D_Mre,D_Mwe									: out std_logic; 
+		D_read_done, D_write_done: out std_logic
 		-- end debug variables	
 );
 end SimpleCompArch;
@@ -42,6 +43,8 @@ architecture rtl of SimpleCompArch is
 	signal mem_addr					: std_logic_vector(11 downto 0);   -- Const. operand addr.(CTRLER	-> MEM)
 	signal Mre							: std_logic;							 -- Mem. read enable  	(CTRLER	-> Mem) 
 	signal Mwe							: std_logic;							 -- Mem. write enable 	(CTRLER	-> Mem)
+	signal read_done: std_logic;
+	signal write_done: std_logic;
 
 	--System local variables
 	signal oe							: std_logic;	
@@ -56,11 +59,14 @@ Unit0: CPU port map (
     Mre,
     Mwe,
     oe,
-    D_rfout_bus,
+    read_done,
+	 write_done,	
+	 
+	 D_rfout_bus,
     D_RFwa,
     D_RFr1a, 
     D_RFr2a,
-    D_RFwe, 			 				
+	 D_RFwe, 		 				
     
     --Degug signals
     D_RFr1e, 
@@ -72,13 +78,16 @@ Unit0: CPU port map (
     --Degug signals
 );	 				
 																				
-Unit1: m4k_ram port map(
-	mem_addr, 
+Unit1: memory port map(
 	sys_clk,
-	mdin_bus, 
+	sys_rst,	
 	Mre, 
 	Mwe,
-	mdout_bus
+	mem_addr, 
+	mdin_bus, 
+	mdout_bus,
+	read_done,
+	write_done
 );
 
 Unit2: obuf port map(oe, mdout_bus, sys_output);
@@ -89,6 +98,8 @@ Unit2: obuf port map(oe, mdout_bus, sys_output);
 	D_mem_addr <= mem_addr; 
 	D_Mre <= Mre;
 	D_Mwe <= Mwe;
+	D_read_done <= read_done;
+	D_write_done <= write_done;
 -- end debug variables		
 		
 end rtl;
