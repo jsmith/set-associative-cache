@@ -69,6 +69,9 @@ architecture behv of cache	is
 	
 	signal mem_read: std_logic;
 	signal mem_write: std_logic;
+	
+	signal mem_read_complete: std_logic;
+	signal mem_write_complete: std_logic;
 
 	signal prev_cpu_read: std_logic;
 	signal prev_cpu_write: std_logic;
@@ -78,13 +81,16 @@ architecture behv of cache	is
 	signal block_addr: std_logic_vector(9 downto 0); 
 	
 begin
-	Unit1: m4k_ram port map(
-		block_addr, 
+	Unit1: memory port map(
 		clock,
-		block_in, 
+		rst,	
 		mem_read, 
 		mem_write,
-		block_out
+		block_addr, 
+		block_in, 
+		block_out,
+		mem_read_complete,
+		mem_write_complete -- what to do about these..
 	);
 
 	process(cpu_write, cpu_read, cpu_addr)
@@ -265,7 +271,10 @@ begin
 					state := Delay;
 				
 				when Delay =>
-					state := delay_state;
+					if mem_read_complete = '1' or mem_write_complete = '1' then 
+						state := delay_state;
+					end if;
+					
 
 				when FinishRead =>
 					cache_mem(target_line) <= block_out;

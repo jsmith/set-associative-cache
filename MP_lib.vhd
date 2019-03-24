@@ -117,6 +117,21 @@ component m4k_ram IS
 	);
 END component;
 
+component memory IS
+	PORT
+	(
+		clock: in std_logic;
+		rst: in std_logic;
+		mem_read: in std_logic;
+		mem_write: in std_logic;
+		block_addr: in std_logic_vector(9 downto 0);
+		block_in: in std_logic_vector(63 downto 0);
+		block_out: out std_logic_vector(63 downto 0);
+		read_complete: out std_logic;
+		write_complete: out std_logic
+	);
+END component;
+
 component obuf is
 port(
 	O_en: 		in std_logic;
