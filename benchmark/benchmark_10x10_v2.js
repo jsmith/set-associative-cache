@@ -32,9 +32,10 @@ set COUNT 200
 
 readm 0
 
-set ADDR_A 150
-set ADDR_B 250
+set ADDR_A 149
+set ADDR_B 249
 
+LOOP:
 load DATA_A ADDR_A
 load DATA_B ADDR_B
 subt DATA_A DATA_B DATA_A
@@ -46,7 +47,7 @@ subt ADDR_B ADDR_B ONE
 # times. ie. 2x2 = 5, 10x10 = 101.
 # This seemed like the easiest way to stop looping
 mov1 TEMP 50
-jz TEMP 11
+jz TEMP LOOP
 
 # Debugging Output
 readm 50
