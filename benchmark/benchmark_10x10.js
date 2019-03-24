@@ -15,12 +15,12 @@ set ONE 1
 set BASE 50
 set COUNT 200
 
-INIT_MATRICES:
-add ADDR BASE COUNT     # R3 <- R1 + R2
-save ADDR COUNT         # MEM[R3] <- R2
-subt COUNT COUNT ONE    # R2 <- R2 - 1
-mov1 TEMP 51            # TEMP <- MEM[51]
-jz TEMP INIT_MATRICES   # if R4 == 0, goto 3
+# INIT_MATRICES:
+# add ADDR BASE COUNT     # R3 <- R1 + R2
+# save ADDR COUNT         # MEM[R3] <- R2
+# subt COUNT COUNT ONE    # R2 <- R2 - 1
+# mov1 TEMP 51            # TEMP <- MEM[51]
+# jz TEMP INIT_MATRICES   # if R4 == 0, goto 3
 
 # redefine variables for second loop :)
 #define ADDR_A R1
@@ -32,9 +32,10 @@ jz TEMP INIT_MATRICES   # if R4 == 0, goto 3
 
 readm 0
 
-set ADDR_A 150
-set ADDR_B 250
+set ADDR_A 149
+set ADDR_B 249
 
+LOOP:
 load DATA_A ADDR_A
 load DATA_B ADDR_B
 subt DATA_A DATA_B DATA_A
@@ -46,7 +47,7 @@ subt ADDR_B ADDR_B ONE
 # times. ie. 2x2 = 5, 10x10 = 101.
 # This seemed like the easiest way to stop looping
 mov1 TEMP 50
-jz TEMP 11
+jz TEMP LOOP
 
 # Debugging Output
 readm 50
