@@ -33,7 +33,9 @@ port(
 	Ms_ctrl:	out std_logic_vector(1 downto 0);
 	Mre_ctrl:	out std_logic;
 	Mwe_ctrl:	out std_logic;
-	oe_ctrl:	out std_logic
+	oe_ctrl:	out std_logic;
+	read_done: in std_logic;
+	write_done: in std_logic
 );
 end controller;
 
@@ -71,9 +73,10 @@ begin
 				state <= S1;
 
 			when Sdly =>								-- Delay State
-				maccesdelay:=maccesdelay-1;
-				if maccesdelay=0 then state <= delaystate;
-				   else state <= Sdly ;
+				if read_done = '1' or write_done = '1' then 
+					state <= delaystate;
+				else 
+					state <= Sdly ;
 				end if;
 
 			when S1 =>

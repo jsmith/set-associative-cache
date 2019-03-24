@@ -21,6 +21,8 @@ port( cpu_clk					: in std_logic;
 		Mre_s					: out std_logic;
 		Mwe_s					: out std_logic;
 		oe_s					: out std_logic;
+		read_done: in std_logic;
+		write_done: in std_logic;
 		
 		-- Debug signals: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
@@ -70,7 +72,9 @@ begin
 		ALUs_s,
 		Mre_s,
 		Mwe_s,
-		oe_s
+		oe_s,
+		read_done,
+		write_done
 	);
 
 	Unit1: datapath port map( cpu_clk,cpu_rst,immd_bus,mdout_bus, RFs_s,RFwa_s,RFr1a_s,
