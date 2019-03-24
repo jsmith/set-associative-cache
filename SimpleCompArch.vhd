@@ -78,19 +78,6 @@ Unit0: CPU port map (
     D_jpz
     --Degug signals
 );	 				
-<<<<<<< HEAD
-
-Unit1: obuf port map(oe, mdout_bus, sys_output);
-
-Unit2: cache port map(
-	sys_clk,
-	sys_rst,
-	cpu_read,
-	cpu_write,
-	mem_addr,
-	mdin_bus,
-	mdout_bus
-=======
 																				
 Unit1: memory port map(
 	sys_clk,
@@ -102,22 +89,17 @@ Unit1: memory port map(
 	mdout_bus,
 	read_done,
 	write_done
->>>>>>> 9f427f612fff00cf151001e7210e1bbb9facdd50
 );
 
 -- Debug signals: output to upper level for simulation purpose only
 	D_mdout_bus <= mdout_bus;	
 	D_mdin_bus <= mdin_bus;
 	D_mem_addr <= mem_addr; 
-<<<<<<< HEAD
-	D_cpu_read <= cpu_read;
-	D_cpu_write <= cpu_write;
-=======
 	D_Mre <= Mre;
 	D_Mwe <= Mwe;
 	D_read_done <= read_done;
 	D_write_done <= write_done;
->>>>>>> 9f427f612fff00cf151001e7210e1bbb9facdd50
+
 -- end debug variables		
 		
 end rtl;
