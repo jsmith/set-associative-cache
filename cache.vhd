@@ -120,7 +120,6 @@ begin
 		tag <= cpu_addr(11 downto 4);
 		set <= cpu_addr(3 downto 2);
 		word <= cpu_addr(1 downto 0);
-		block_addr <= cpu_addr(11 downto 2);
 		
 		if (rst = '1') then
 			cache_mem <= (others => x"0000000000000000");
@@ -229,11 +228,15 @@ begin
 						D_write_back <= write_back;
 						
 						if write_back = '1' then
+							-- Make sure to retrieve the correct address from the tag array before writing
+							block_addr <= tmp_tags(target_line) & set;
 							mem_write <= '1';
+							
 							block_in <= cache_mem(target_line);
 							state := Write;
 						else
 							mem_read <= '1';
+							block_addr <= cpu_addr(11 downto 2);
 							state := MissRead;
 						end if;
 					end if;
@@ -261,6 +264,7 @@ begin
 				when WriteFinish =>
 					mem_write <= '0';
 					mem_read <= '1';
+					block_addr <= cpu_addr(11 downto 2);
 					-- This is just for debug purposes
 					-- We don't actually need to set this back to 0
 					D_write_back <= '0';
