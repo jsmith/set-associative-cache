@@ -36,6 +36,8 @@ port(
 		
 		cache_read_complete: in std_logic;
 		cache_write_complete: in std_logic;
+		
+		next_value: in std_logic;
 
 		-- Debug variables: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
@@ -43,9 +45,16 @@ port(
 		D_RFwe_s, D_RFr1e_s, D_RFr2e_s: out std_logic;
 		D_ALUs_s: out std_logic_vector(3 downto 0);
 		D_RFs_s: out std_logic_vector(1 downto 0);
-		D_PCld_s, D_jpz_s: out std_logic
+		D_PCld_s, D_jpz_s, D_hex_clock: out std_logic
 		-- end debug variables				
 );
+end component;
+
+component seven_seg is
+port(
+    data_in: in std_logic_vector(3 downto 0); -- Desired Output value
+    hex_out: out std_logic_vector(0 to 6) -- Output values for hex display
+); 
 end component;
 
 component alu is

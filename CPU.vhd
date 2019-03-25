@@ -26,13 +26,17 @@ port( cpu_clk					: in std_logic;
 		cache_read_complete : in std_logic;
 		cache_write_complete : in std_logic;
 		
+		-- Board Button Signal
+		next_value: in std_logic;
+		
 		-- Debug signals: output to upper level for simulation purpose only
 		D_rfout_bus: out std_logic_vector(15 downto 0);  
 		D_RFwa_s, D_RFr1a_s, D_RFr2a_s: out std_logic_vector(3 downto 0);
 		D_RFwe_s, D_RFr1e_s, D_RFr2e_s: out std_logic;
 		D_ALUs_s: out std_logic_vector(3 downto 0);
 		D_RFs_s: out std_logic_vector(1 downto 0);
-		D_PCld_s, D_jpz_s: out std_logic
+		D_PCld_s, D_jpz_s: out std_logic;
+		D_hex_clock: out std_logic
 		-- end debug variables		
 		
 		);
@@ -53,10 +57,13 @@ signal ALUs_s					: std_logic_vector(3 downto 0); -- ALU select (CTRLER 	-> ALU)
 signal PCld_s					: std_logic; -- Program Counter select (CTRLER -> SMUX)
 signal jpz_s					: std_logic; -- Jump check flag (CTRLER -> ALU)
 
+signal hex_clk:	std_logic;
+signal output_enabled:	std_logic;
+
 begin
 	mem_addr <= addr_bus(11 downto 0); 
 	Unit0: ctrl_unit port map(	
-		cpu_clk,
+		hex_clk,
 		cpu_rst,
 		PCld_s,
 		mdout_bus,
@@ -74,17 +81,19 @@ begin
 		ALUs_s,
 		Mre_s,
 		Mwe_s,
-		oe_s,
+		output_enabled,
 		
 		-- Cache Signals
 		cache_read_complete,
 		cache_write_complete
 	);
 
-	Unit1: datapath port map( cpu_clk,cpu_rst,immd_bus,mdout_bus, RFs_s,RFwa_s,RFr1a_s,
+	Unit1: datapath port map(hex_clk,cpu_rst,immd_bus,mdout_bus, RFs_s,RFwa_s,RFr1a_s,
 								RFr2a_s,RFwe_s,RFr1e_s,RFr2e_s,jpz_s,ALUs_s,PCld_s,rfout_bus, mdin_bus);
-
-								
+	
+-- Sets output signal.
+	oe_s <= output_enabled;
+	
 -- Assignment of debug variables	
 	D_rfout_bus<= rfout_bus;
 	D_RFwa_s<= RFwa_s;
@@ -97,4 +106,71 @@ begin
 	D_ALUs_s<= ALUs_s;
 	D_PCld_s<= PCld_s;
 	D_jpz_s<= jpz_s;
+	D_hex_clock<=hex_clk;
+	
+process(cpu_clk, cpu_rst)
+
+variable to_zero: std_logic;
+
+type states is (
+	state_wait, 
+	state_btn_press, 
+	state_btn_release, 
+	state_oe_low
+);
+variable state: states;
+
+begin
+
+	hex_clk <= cpu_clk;
+	
+	if (cpu_rst = '1') then
+		state := state_wait;
+		hex_clk <= cpu_clk;
+		
+	elsif (cpu_clk'event and cpu_clk = '1') then
+		
+		case state is
+		when state_wait =>
+			if (output_enabled = '1') then
+				state := state_btn_press;
+			end if;
+			
+			hex_clk <= cpu_clk;
+			to_zero := '0';
+		
+		when state_btn_press =>
+			if (next_value = '0') then
+				state := state_btn_release;
+			end if;
+			
+			to_zero := '1';
+--			hex_clk <= cpu_clk;
+		
+		when state_btn_release =>
+			if (next_value = '1') then
+				state := state_oe_low;
+			end if;
+			
+			to_zero := '1';
+--			hex_clk <= cpu_clk;
+		
+		when state_oe_low =>
+			if (output_enabled = '0') then
+				state := state_wait;
+			end if;
+			hex_clk <= cpu_clk;
+			to_zero := '0';
+			
+		when others =>
+			state := state_wait;
+			to_zero := '0';
+			
+		end case;
+	end if;
+	
+	if (to_zero = '1') then
+		hex_clk <= '0';
+	end if;
+end process;	
 end structure;

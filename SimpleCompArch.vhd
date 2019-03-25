@@ -46,9 +46,23 @@ port( sys_clk								:	in std_logic;
 		D_tag: out std_logic_vector(7 downto 0);
 		D_set: out std_logic_vector(1 downto 0);
 		D_word: out std_logic_vector(1 downto 0);
-		D_target_line: out std_logic_vector(2 downto 0)
+		D_target_line: out std_logic_vector(2 downto 0);
+		D_hex_clock: out std_logic;
 		
 		-- end debug variables	
+		
+		-- Hex Display Variables
+		Board_hex0: out std_logic_vector(0 to 6);
+		Board_hex1: out std_logic_vector(0 to 6);
+		Board_hex2: out std_logic_vector(0 to 6);
+		Board_hex3: out std_logic_vector(0 to 6);
+		Board_hex4: out std_logic_vector(0 to 6);
+		Board_hex5: out std_logic_vector(0 to 6);
+		Board_hex6: out std_logic_vector(0 to 6);
+		Board_hex7: out std_logic_vector(0 to 6);
+		
+		-- Signal to get next value of matrix
+		next_value:	in std_logic
 );
 end SimpleCompArch;
 
@@ -63,6 +77,9 @@ architecture rtl of SimpleCompArch is
 	signal mem_write: std_logic;							 -- Mem. write enable 	(CTRLER	-> Mem)
 	signal read_complete: std_logic;
 	signal write_complete: std_logic;
+	
+	signal hex_output: std_logic_Vector(15 downto 0);
+	signal latch_output: std_logic_Vector(15 downto 0);
 	
 	--System local variables
 	signal oe							: std_logic;	
@@ -82,6 +99,9 @@ Unit0: CPU port map (
 	 read_complete,
 	 write_complete,
 	 
+	 -- Board Button Press
+	 next_value,
+	 
     D_rfout_bus,
     D_RFwa,
     D_RFr1a, 
@@ -94,11 +114,12 @@ Unit0: CPU port map (
     D_ALUs,
     D_RFs,
     D_PCld, 
-    D_jpz
+    D_jpz,
+	 D_hex_clock
     --Degug signals
 );	 				
 
-Unit1: obuf port map(oe, mdout_bus, sys_output);
+Unit1: obuf port map(oe, mdout_bus, hex_output);
 
 Unit2: cache port map(
 	sys_clk,
@@ -128,6 +149,19 @@ Unit2: cache port map(
 	D_target_line
 );
 
+Unit3: seven_seg port map(x"0", Board_hex4);
+Unit4: seven_seg port map(x"0", Board_hex5);
+Unit5: seven_seg port map(x"0", Board_hex6);
+Unit6: seven_seg port map(x"0", Board_hex7);
+
+Unit7: seven_seg port map(latch_output(3 downto 0), Board_hex0);
+Unit8: seven_seg port map(latch_output(7 downto 4), Board_hex1);
+Unit9: seven_seg port map(latch_output(11 downto 8), Board_hex2);
+Unit10: seven_seg port map(latch_output(15 downto 12), Board_hex3);
+
+-- Do thing
+	sys_output <= hex_output;
+
 -- Debug signals: output to upper level for simulation purpose only
 	D_mdout_bus <= mdout_bus;	
 	D_mdin_bus <= mdin_bus;
@@ -137,5 +171,24 @@ Unit2: cache port map(
 	D_read_complete <= read_complete;
 	D_write_complete <= write_complete;
 -- end debug variables		
-		
+
+process(sys_clk, sys_rst)	
+variable last_output: std_logic_vector(15 downto 0);
+
+begin
+
+if (sys_rst = '1') then
+	latch_output <= x"0000";
+	
+elsif(sys_clk'event and sys_clk = '1') then
+	if (hex_output /= last_output) then
+		latch_output <= last_output;
+	end if;
+	
+	last_output := hex_output;
+end if;
+
+end process;
+
+	
 end rtl;
