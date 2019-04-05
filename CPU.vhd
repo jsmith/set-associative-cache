@@ -171,6 +171,8 @@ begin
 	
 	if (to_zero = '1') then
 		hex_clk <= '0';
+	elsif (to_zero = '0') then
+		hex_clk <= cpu_clk;
 	end if;
 end process;	
 end structure;
